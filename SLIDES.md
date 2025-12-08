@@ -805,20 +805,23 @@ Write tests first, generate code to pass them
 2. CREATE AGENTS.MD (15 min)
    └─ Document OBSERVED patterns (not ideal ones)
 
-3. WRITE REQUIREMENTS (10 min)
-   └─ New feature specs, impact on existing code
+3. DOCUMENT EXISTING REQUIREMENTS (10 min)
+   └─ Retroactively generate product requirements for current functionality
 
-4. CREATE IMPLEMENTATION PLAN (8 min)
-   └─ How to integrate with existing architecture
+4. ADD UNIT TESTS (10 min)
+   └─ Create safety net before making changes
 
-5. IMPLEMENT WITH AGENTS (12 min)
-   └─ Modify existing code, add new features
+5. WRITE FEATURE REQUIREMENTS (10 min)
+   └─ New feature specs with implementation plan
 
-6. TEST & VERIFY (10 min)
-   └─ New features work, old features still work
+6. IMPLEMENT WITH TESTS (12 min)
+   └─ Generate feature code AND tests together
+
+7. BUILD & TEST (8 min)
+   └─ All tests pass, regression testing
 ```
 
-**Key Difference:** Explore FIRST, then document
+**Key Difference:** Document and test existing code BEFORE adding features
 
 ---
 
@@ -920,12 +923,13 @@ Write tests first, generate code to pass them
 - Return book
 - Remove book
 
-**Your Task:** Add borrower tracking
-- Who borrowed each book?
-- Search books by borrower name
-- Show borrower in list view
+**Your Task:** Choose a feature to add:
+- Book ratings (1-5 stars)
+- Due dates for checkouts
+- Book categories/genres
+- Export to CSV
 
-**Time:** 60 minutes
+**Time:** ~85 minutes
 
 **Resources:**
 - `02-brownfield/INSTRUCTIONS.md` - Step-by-step guide
@@ -943,32 +947,34 @@ Write tests first, generate code to pass them
 - Try all commands
 - Read Book.cs model
 - Read BookService.cs logic
-- Understand current architecture
 
-### Phase 2: Document (15 min)
-- Create AGENTS.md
-- Note: No async/await used
-- Note: Manual service instantiation
-- Note: Existing error messages
-- Note: JSON storage location
+### Phase 2: Document AGENTS.md (15 min)
+- Note existing patterns
+- Document conventions observed
+- Identify constraints
 
-### Phase 3: Requirements (10 min)
-- Feature: Add borrower name
-- Track who borrowed what
-- Search by borrower
-- Modify checkout command
+### Phase 3: Document Existing Requirements (10 min)
+- Generate product requirements for current functionality
+- Ask questions to reveal edge cases
+- Establish baseline documentation
 
-### Phase 4: Plan (8 min)
-- Extend Book model with Borrower property
-- Update BookService.Checkout method
-- Add SearchByBorrower method
-- Add CLI command
+### Phase 4: Add Unit Tests (10 min)
+- Create tests for existing functionality
+- Establish safety net BEFORE making changes
+- Verify tests pass
 
-### Phase 5: Implement (12 min)
-- Ask agent to modify Book.cs
-- Update BookService
-- Update Program.cs CLI
+### Phase 5: Write Feature Requirements (10 min)
+- Choose your feature
+- Write requirements and implementation plan
+- Reference AGENTS.md
+
+### Phase 6: Implement with Tests (12 min)
+- Generate code AND tests together
 - Follow existing patterns!
+
+### Phase 7: Build & Test (8 min)
+- All tests pass (existing + new)
+- Manual verification
 
 ---
 
@@ -1421,6 +1427,7 @@ dotnet test
 ### Sample Projects:
 - `01-greenfield/` - Task Manager (concept)
 - `02-brownfield/BookLibrary/` - Working C# CLI app
+- `02-brownfield/LegacyInventory/` - Upgrade exercise (.NET modernization)
 
 **Customize for your projects!**
 

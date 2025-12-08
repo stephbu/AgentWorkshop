@@ -1,6 +1,6 @@
 # Brownfield Lab: Extending Existing Code
 
-**Duration:** ~75 minutes  
+**Duration:** ~85 minutes  
 **Goal:** Learn to apply requirements-first development to an existing codebase you didn't write.
 
 ---
@@ -416,8 +416,6 @@ dotnet run -- return [book-id]
 - Fix by refining requirements, then regenerate
 
 ---
-
-## Part 8: Reflect (5 minutes)
 
 ## Part 8: Reflect (5 minutes)
 

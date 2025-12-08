@@ -91,6 +91,9 @@ The workflow:
   /02-brownfield
     INSTRUCTIONS.md                   # Lab instructions
     AGENTS-TEMPLATE-BROWNFIELD.md     # Template for existing projects
+    PRODUCT-REQUIREMENTS-TEMPLATE.md  # Product requirements template
+    IMPLEMENTATION-PLAN-TEMPLATE.md   # Implementation plan template
+    UPGRADE-EXERCISE.md               # Bonus: Code modernization exercise
     /BookLibrary                      # Sample C# project to extend
       /Models
         Book.cs
@@ -98,7 +101,11 @@ The workflow:
         BookService.cs
       Program.cs
       BookLibrary.csproj
-      README.md
+    /LegacyInventory                  # Bonus: C# project for modernization exercise
+      /Models
+      /Services
+      /Tests
+      LegacyInventory.sln
   
   /resources
     BEST-PRACTICES.md                 # Comprehensive best practices guide
@@ -184,7 +191,8 @@ The workflow:
 
 **After Brownfield Lab:**
 - How was this different from greenfield?
-- What context did the agent need?
+- How did documenting existing requirements first help?
+- Did creating tests before adding features give you confidence?
 - Did you discover patterns that weren't documented?
 - Would you approach existing projects differently now?
 
@@ -283,48 +291,6 @@ This workshop can be adapted:
 - **Custom agents:** Adapt for your tool
 
 ---
-
-## Contributing
-
-Improvements welcome! To contribute:
-
-1. Fork this repository
-2. Make your changes
-3. Test with real participants if possible
-4. Submit pull request with:
-   - What you changed and why
-   - Any new materials added
-   - Feedback from testing (if applicable)
-
-### Ideas for Contribution
-- Additional lab exercises
-- Alternative brownfield projects
-- Language-specific variations
-- Troubleshooting additions
-- Best practice refinements
-
----
-
-## License
-
-[Specify license - MIT, Apache, proprietary, etc.]
-
----
-
-## Contact
-
-**Workshop Creator:** [Your name/contact]  
-**Issues/Questions:** [GitHub issues, email, etc.]  
-**Feedback:** [Survey link, email, etc.]
-
----
-
-## Acknowledgments
-
-Thanks to:
-- GitHub Copilot team for agent mode
-- Early workshop participants for feedback
-- [Any other contributors]
 
 ---
 

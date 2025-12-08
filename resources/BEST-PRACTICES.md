@@ -39,19 +39,23 @@ When agents generate code that's not quite right, the instinct is to edit the co
    ↓
 2. Create/update AGENTS.md (document existing conventions)
    ↓
-3. Write requirements for change (describe delta from current state)
+3. Generate Product Requirements for existing functionality
    ↓
-4. Write implementation plan (how to integrate)
+4. Add unit tests for existing code where lacking (safety net)
    ↓
-5. Agent generates implementation (following existing patterns)
+5. Write feature requirements (describe what to add)
    ↓
-6. Review output
+6. Write implementation plan (how to integrate)
    ↓
-7. If not right → Update AGENTS.md or requirements → Regenerate
+7. Agent generates implementation AND tests (following existing patterns)
    ↓
-8. Test new feature AND existing features (regression)
+8. Review output
    ↓
-9. Update documentation (requirements, AGENTS.md, README, comments)
+9. If not right → Update AGENTS.md or requirements → Regenerate
+   ↓
+10. Run ALL tests (existing + new) - regression testing
+   ↓
+11. Update documentation (requirements, AGENTS.md, README)
 ```
 
 ### 3. Critical: Keep Documentation Current

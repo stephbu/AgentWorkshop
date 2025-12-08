@@ -125,9 +125,9 @@ Participants will build a complete C# CLI application using agents:
 - Creating AGENTS.md for legacy projects
 - Demo: Exploring an existing C# project
 
-#### Part 2: Hands-On Lab - Extend Existing Code (60 min)
+#### Part 2: Hands-On Lab - Extend Existing Code (75 min)
 
-**Lab Exercise: Add Borrower Tracking to Book Library**
+**Lab Exercise: Extend the Book Library**
 
 Participants will extend an existing C# CLI application:
 
@@ -141,36 +141,41 @@ Participants will extend an existing C# CLI application:
    - Note existing patterns (naming, structure, error handling)
    - Identify areas to preserve vs. improve
 
-3. **Write Product Requirements** (10 min)
-   - Feature: Track who borrowed books
-   - Requirements for borrower management
-   - Search by borrower functionality
+3. **Retroactively Document Product Requirements** (10 min)
+   - Generate requirements for existing functionality
+   - Ask clarifying questions to reveal edge cases
+   - Establish baseline documentation
 
-4. **Create Implementation Plan** (8 min)
-   - Extend Book model
-   - Update BookService
-   - Add new CLI commands
+4. **Add Unit Tests for Existing Code** (10 min)
+   - Generate tests for current functionality
+   - Establish safety net before changes
+   - Verify tests pass
 
-5. **Implement with Agents** (12 min)
-   - Modify existing code
-   - Add new functionality
-   - Generate tests for new features
+5. **Write Feature Requirements** (10 min)
+   - Choose a feature to add
+   - Write requirements and implementation plan
+   - Reference AGENTS.md and existing requirements
 
-#### Part 3: Integration & Testing (10 min)
-- Test new features
-- Verify backward compatibility
-- Handle edge cases
+6. **Implement Feature with Tests** (12 min)
+   - Generate feature code AND tests together
+   - Follow existing patterns
+   - Verify all tests pass
 
-#### Part 4: Discussion (5 min)
+7. **Build and Test** (8 min)
+   - Run all tests
+   - Manual verification
+   - Regression testing
+
+#### Discussion & Reflection (5 min)
 - Brownfield vs. greenfield experiences
-- Managing technical debt
-- Balancing consistency with improvement
+- Value of documenting existing code first
+- Value of tests as safety net
 
 #### Deliverables:
-- Extended BookLibrary with borrower tracking
+- Extended BookLibrary with new feature
 - AGENTS.md documenting project conventions
-- Product Requirements for new features
-- Implementation Plan for changes
+- Product Requirements (existing + new feature)
+- Unit tests for existing and new functionality
 
 ---
 

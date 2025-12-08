@@ -856,10 +856,12 @@ Each phase should pass all existing tests.
 ### Brownfield
 1. Explore codebase
 2. Create `AGENTS.md` from existing patterns
-3. Write requirements and implementation plan for new feature
-4. Generate code via agent
-5. Review and regression test
-6. Iterate on requirements if needed
+3. Generate product requirements for existing functionality
+4. Add unit tests for existing code (safety net)
+5. Write feature requirements and implementation plan
+6. Generate code AND tests via agent
+7. Run ALL tests (regression testing)
+8. Iterate on requirements if needed
 
 ---
 
