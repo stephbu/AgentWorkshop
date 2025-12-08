@@ -343,13 +343,19 @@ Thanks to:
 ### Related Reading
 - Prompt engineering guides
 - Test-driven development resources
-- Architecture decision records (ADRs)
+- [Architecture Decision Records (ADRs)](https://adr.github.io/)
 - Clean Code principles
 
 ### Tools
 - [GitHub CLI](https://cli.github.com/)
 - [.NET CLI](https://learn.microsoft.com/dotnet/core/tools/)
 - [VS Code Extensions](https://marketplace.visualstudio.com/)
+
+---
+
+## License
+
+This workshop material is licensed under the [MIT License](LICENSE).
 
 ---
 
