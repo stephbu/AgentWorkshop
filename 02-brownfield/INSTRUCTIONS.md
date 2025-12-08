@@ -438,6 +438,19 @@ You've now practiced spec-first development in both:
 - ✅ **Greenfield** - Starting from nothing
 - ✅ **Brownfield** - Extending existing code
 
+### Bonus Exercise: Code Modernization
+
+If you have extra time or want additional practice, try the **Legacy Inventory Modernization Exercise**:
+
+📁 **Project:** [LegacyInventory/](./LegacyInventory/)  
+📋 **Instructions:** [UPGRADE-EXERCISE.md](./UPGRADE-EXERCISE.md)
+
+This exercise teaches you how to use AI agents to:
+- Upgrade from C# 10 to C# 12 language features
+- Migrate from Newtonsoft.Json to System.Text.Json
+- Apply modern patterns like primary constructors
+- Ensure all 32 unit tests pass after modernization
+
 The next step is applying this to your real projects!
 
 **Resources:** See [../resources/](../resources/) for best practices, cheat sheets, and further reading.

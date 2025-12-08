@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LegacyInventory", "LegacyInventory.csproj", "{283E764C-401D-4093-82CD-87BE354B84E3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LegacyInventory.Tests", "Tests\LegacyInventory.Tests.csproj", "{CC51DA64-9647-4D3B-9C97-8A36300C2A5B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{283E764C-401D-4093-82CD-87BE354B84E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{283E764C-401D-4093-82CD-87BE354B84E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{283E764C-401D-4093-82CD-87BE354B84E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{283E764C-401D-4093-82CD-87BE354B84E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC51DA64-9647-4D3B-9C97-8A36300C2A5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC51DA64-9647-4D3B-9C97-8A36300C2A5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC51DA64-9647-4D3B-9C97-8A36300C2A5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC51DA64-9647-4D3B-9C97-8A36300C2A5B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
