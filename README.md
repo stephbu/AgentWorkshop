@@ -2,6 +2,9 @@
 
 A half-day workshop teaching developers how to use AI agents effectively for software development using Product Requirements and Implementation Plans.
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 ---
 
 ## Workshop Overview
@@ -350,6 +353,17 @@ Thanks to:
 - [GitHub CLI](https://cli.github.com/)
 - [.NET CLI](https://learn.microsoft.com/dotnet/core/tools/)
 - [VS Code Extensions](https://marketplace.visualstudio.com/)
+
+---
+
+## Contributing
+
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
+
+- Reporting issues and suggesting enhancements
+- Submitting pull requests
+- Style guide and terminology consistency
+- Translation guidelines
 
 ---
 
