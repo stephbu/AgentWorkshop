@@ -37,24 +37,12 @@ Use this template to define HOW the feature will be technically implemented.
 
 ### High-Level Architecture
 
-```
-┌─────────────────┐
-│   Program.cs    │  ← Entry point, command routing
-│  (CLI Interface)│
-└────────┬────────┘
-         │
-         ├──────────────────────────────────┐
-         │                                  │
-┌────────▼────────┐              ┌─────────▼────────┐
-│  TaskService    │              │ TaskRepository   │
-│ (Business Logic)│──────────────│ (Data Access)    │
-└─────────────────┘              └──────────────────┘
-                                          │
-                                          │
-                                   ┌──────▼──────┐
-                                   │  tasks.json │
-                                   │  (Storage)  │
-                                   └─────────────┘
+```mermaid
+flowchart TD
+    A["Program.cs<br/>(CLI Interface)"] -->|Entry point, command routing| B["TaskService<br/>(Business Logic)"]
+    A --> C["TaskRepository<br/>(Data Access)"]
+    B --> C
+    C --> D["tasks.json<br/>(Storage)"]
 ```
 
 **Layers:**
@@ -425,14 +413,14 @@ File.Move(tempFile, targetFile, overwrite: true);  // Atomic on POSIX
 
 ### Exception Hierarchy
 
-```
-Exception
-├─ ArgumentException (user input errors)
-│  └─ ArgumentNullException
-├─ TaskNotFoundException (custom, task not found)
-├─ IOException (file system errors)
-│  └─ UnauthorizedAccessException
-└─ JsonException (corrupted data)
+```mermaid
+flowchart TD
+    E[Exception] --> AE["ArgumentException<br/>(user input errors)"]
+    AE --> ANE[ArgumentNullException]
+    E --> TNF["TaskNotFoundException<br/>(custom, task not found)"]
+    E --> IO["IOException<br/>(file system errors)"]
+    IO --> UAE[UnauthorizedAccessException]
+    E --> JE["JsonException<br/>(corrupted data)"]
 ```
 
 ### Error Messages

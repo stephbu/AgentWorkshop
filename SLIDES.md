@@ -630,21 +630,18 @@ Build a Task Manager CLI application in C# from zero to working code
 
 ## The Process
 
-```
-1. CREATE AGENTS.md (10 min)
-   └─ Define tech stack, conventions, patterns
-
-2. WRITE PRODUCT REQUIREMENTS (10 min)
-   └─ User stories, acceptance criteria, features
-
-3. CREATE IMPLEMENTATION PLAN (10 min)
-   └─ Architecture, components, design decisions
-
-4. GENERATE CODE WITH AGENTS (20 min)
-   └─ Models → Services → CLI → Tests
-
-5. ITERATE & REFINE (10 min)
-   └─ Test, fix issues, add features
+```mermaid
+flowchart TD
+    A["1. CREATE AGENTS.md<br/>(10 min)"] --> B["2. WRITE PRODUCT REQUIREMENTS<br/>(10 min)"]
+    B --> C["3. CREATE IMPLEMENTATION PLAN<br/>(10 min)"]
+    C --> D["4. GENERATE CODE WITH AGENTS<br/>(20 min)"]
+    D --> E["5. ITERATE & REFINE<br/>(10 min)"]
+    
+    A -.- A1["Define tech stack, conventions, patterns"]
+    B -.- B1["User stories, acceptance criteria, features"]
+    C -.- C1["Architecture, components, design decisions"]
+    D -.- D1["Models → Services → CLI → Tests"]
+    E -.- E1["Test, fix issues, add features"]
 ```
 
 **Total Time: ~60 minutes**
@@ -798,27 +795,22 @@ Write tests first, generate code to pass them
 
 ## The Process (Different from Greenfield!)
 
-```
-1. EXPLORE CODEBASE (15 min)
-   └─ Read code, understand patterns, run existing features
-
-2. CREATE AGENTS.MD (15 min)
-   └─ Document OBSERVED patterns (not ideal ones)
-
-3. DOCUMENT EXISTING REQUIREMENTS (10 min)
-   └─ Retroactively generate product requirements for current functionality
-
-4. ADD UNIT TESTS (10 min)
-   └─ Create safety net before making changes
-
-5. WRITE FEATURE REQUIREMENTS (10 min)
-   └─ New feature specs with implementation plan
-
-6. IMPLEMENT WITH TESTS (12 min)
-   └─ Generate feature code AND tests together
-
-7. BUILD & TEST (8 min)
-   └─ All tests pass, regression testing
+```mermaid
+flowchart TD
+    A["1. EXPLORE CODEBASE<br/>(15 min)"] --> B["2. CREATE AGENTS.MD<br/>(15 min)"]
+    B --> C["3. DOCUMENT EXISTING REQUIREMENTS<br/>(10 min)"]
+    C --> D["4. ADD UNIT TESTS<br/>(10 min)"]
+    D --> E["5. WRITE FEATURE REQUIREMENTS<br/>(10 min)"]
+    E --> F["6. IMPLEMENT WITH TESTS<br/>(12 min)"]
+    F --> G["7. BUILD & TEST<br/>(8 min)"]
+    
+    A -.- A1["Read code, understand patterns, run existing features"]
+    B -.- B1["Document OBSERVED patterns (not ideal ones)"]
+    C -.- C1["Retroactively generate product requirements"]
+    D -.- D1["Create safety net before making changes"]
+    E -.- E1["New feature specs with implementation plan"]
+    F -.- F1["Generate feature code AND tests together"]
+    G -.- G1["All tests pass, regression testing"]
 ```
 
 **Key Difference:** Document and test existing code BEFORE adding features

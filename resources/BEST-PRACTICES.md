@@ -1413,32 +1413,27 @@ Ask questions about:
 
 ## Quick Reference: Decision Tree
 
-```
-Need to add/change something?
-│
-├─ Do I understand the requirements?
-│  ├─ No → Research, explore, ask questions
-│  └─ Yes ↓
-│
-├─ Is there an AGENTS.md?
-│  ├─ No → Create one (or ask agent to draft)
-│  └─ Yes ↓
-│
-├─ Does AGENTS.md cover this pattern?
-│  ├─ No → Update AGENTS.md
-│  └─ Yes ↓
-│
-├─ Write spec for the change
-│  ├─ Requirements
-│  ├─ Acceptance criteria
-│  ├─ Examples
-│  └─ Edge cases
-│
-├─ Agent generates implementation
-│
-├─ Review output
-│  ├─ Matches spec? → Test and verify
-│  └─ Doesn't match? → Update spec or AGENTS.md, regenerate
+```mermaid
+flowchart TD
+    START["Need to add/change something?"] --> Q1{"Do I understand<br/>the requirements?"}
+    Q1 -->|No| R1["Research, explore, ask questions"]
+    R1 --> Q1
+    Q1 -->|Yes| Q2{"Is there an AGENTS.md?"}
+    Q2 -->|No| R2["Create one (or ask agent to draft)"]
+    R2 --> Q3
+    Q2 -->|Yes| Q3{"Does AGENTS.md<br/>cover this pattern?"}
+    Q3 -->|No| R3["Update AGENTS.md"]
+    R3 --> SPEC
+    Q3 -->|Yes| SPEC["Write spec for the change"]
+    SPEC --> SPEC1["Requirements"]
+    SPEC --> SPEC2["Acceptance criteria"]
+    SPEC --> SPEC3["Examples"]
+    SPEC --> SPEC4["Edge cases"]
+    SPEC1 & SPEC2 & SPEC3 & SPEC4 --> GEN["Agent generates implementation"]
+    GEN --> REVIEW{"Review output:<br/>Matches spec?"}
+    REVIEW -->|Yes| TEST["Test and verify"]
+    REVIEW -->|No| UPDATE["Update spec or AGENTS.md, regenerate"]
+    UPDATE --> GEN
 ```
 
 ---
