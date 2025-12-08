@@ -1,6 +1,6 @@
 # Brownfield Lab: Extending Existing Code
 
-**Duration:** ~60 minutes  
+**Duration:** ~75 minutes  
 **Goal:** Learn to apply requirements-first development to an existing codebase you didn't write.
 
 ---
@@ -9,10 +9,12 @@
 
 In this lab, you will:
 1. Explore an unfamiliar C# codebase (Book Library)
-2. Create or discover an `AGENTS.md` file to document conventions
-3. Write Product Requirements and Implementation Plan for a new feature
-4. Use AI agents to implement the feature following existing patterns
-5. Verify the implementation doesn't break existing functionality
+2. Create an `AGENTS.md` file to document conventions
+3. Retroactively write Product Requirements for existing functionality
+4. Add unit tests for existing code (establish baseline)
+5. Write Feature Requirements and Implementation Plan for a new feature
+6. Implement the feature with AI agents, including new tests
+7. Verify all tests pass and no regressions occurred
 
 ---
 
@@ -60,11 +62,15 @@ Describe:
 
 **More questions to ask:**
 ```
-"What design patterns are used in this codebase?"
+What design patterns are used in this codebase?
+```
 
-"Are there any code smells or areas that could be improved?"
+```
+Are there any code smells or areas that could be improved?
+```
 
-"What testing strategy is currently in place?"
+```
+What testing strategy is currently in place?
 ```
 
 **Look for:**
@@ -115,7 +121,7 @@ What error handling patterns are used in this codebase?
 
 Since this project doesn't have an `AGENTS.md`, you'll create one.
 
-**\ud83d\udca1 Remember: The agent is your assistant for this too!**
+💡 **Remember: The agent is your assistant for this too!**
 
 ### Step 2.1: Draft AGENTS.md with AI assistance
 
@@ -136,8 +142,8 @@ Base this on actual patterns you observe in the code, not ideal practices.
 
 **Alternative approach - ask questions first:**
 ```
-\"What conventions do you observe in the BookLibrary codebase?
-What should I document in AGENTS.md?\"
+What conventions do you observe in the BookLibrary codebase?
+What should I document in AGENTS.md?
 ```
 
 ### Step 2.2: Review and refine
@@ -146,9 +152,11 @@ The agent's draft is a starting point. Review it and ask follow-up questions:
 
 **Verify accuracy:**
 ```
-\"Is the BookService pattern you described consistent across all methods?\"
+Is the BookService pattern you described consistent across all methods?
+```
 
-\"Are there any conventions in the code that you didn't include?\"
+```
+Are there any conventions in the code that you didn't include?
 ```
 
 **Check for completeness:**
@@ -187,9 +195,85 @@ Use the [AGENTS-TEMPLATE-BROWNFIELD.md](./AGENTS-TEMPLATE-BROWNFIELD.md) for ref
 
 ---
 
-## Part 3: Choose a Feature and Write Requirements (10 minutes)
+## Part 3: Retroactively Document Product Requirements (10 minutes)
 
-Select ONE feature to add:
+Before adding new features, document what the system currently does. This creates a baseline and helps you understand the existing behavior.
+
+### Step 3.1: Generate Product Requirements with AI
+
+**Prompt:**
+```
+Analyze the BookLibrary codebase and generate a Product Requirements Document that describes the CURRENT functionality:
+
+1. Purpose - What problem does this system solve?
+2. Users - Who uses this system?
+3. Features - What can users do with it today?
+4. Functional Requirements - List each existing capability
+5. Non-Functional Requirements - Performance, reliability, etc.
+6. Data Model - What entities exist and how do they relate?
+7. CLI Interface - Document all current commands and their parameters
+
+Before generating, ask me clarifying questions about:
+- The intended use cases
+- Any undocumented business rules
+- Edge cases you're unsure about
+```
+
+💡 **Answer the agent's questions thoughtfully** - they often reveal edge cases or assumptions in the code!
+
+### Step 3.2: Review and validate
+
+Check the generated requirements against the actual code:
+
+```
+Does the checkout command actually enforce any limits on how many books a user can check out?
+```
+
+```
+What happens if someone tries to add a book with a duplicate ISBN?
+```
+
+Save to: `/02-brownfield/BookLibrary/requirements/PRODUCT-REQUIREMENTS.md`
+
+---
+
+## Part 4: Add Unit Tests for Existing Code (10 minutes)
+
+Before adding new features, establish a test baseline for existing functionality.
+
+### Step 4.1: Generate unit tests for current functionality
+
+**Prompt:**
+```
+Based on the Product Requirements document and the existing BookService code, generate unit tests that verify the current behavior:
+
+1. Create a test project structure
+2. Write tests for each existing method in BookService
+3. Include edge cases and error conditions
+4. Follow xUnit conventions
+
+Ask me questions if any expected behavior is unclear.
+```
+
+### Step 4.2: Build and run tests
+
+```bash
+cd /02-brownfield/BookLibrary
+dotnet build
+dotnet test
+```
+
+✅ All tests should pass - they verify the *existing* behavior
+
+💡 **If tests fail**, it means either:
+- The tests don't match the actual behavior (fix the tests)
+- There's a bug in the existing code (document it)
+
+---
+
+## Part 5: Choose a Feature and Write Requirements (10 minutes)
+
+Now you're ready to add a new feature. Select ONE:
 
 ### Option A: Book Ratings
 Allow users to rate books (1-5 stars) and display average ratings.
@@ -203,127 +287,116 @@ Add categories/genres to books and filter by category.
 ### Option D: Export to CSV
 Export the book list to a CSV file.
 
-### Step 3.1: Write the feature requirements
-
-Create: `/02-brownfield/BookLibrary/requirements/[FEATURE-NAME]-REQUIREMENTS.md`
-
-**Include these sections:**
-- Clear requirements
-- Acceptance criteria (Given-When-Then)
-- Examples showing usage
-- Error cases
-- Technical constraints
-- Implementation plan
-
-**Key for brownfield:**
-```markdown
-## Integration Points
-- Existing components to modify: [list]
-- New components to create: [list]
-- Breaking changes: [none/describe]
-
-## Implementation Plan
-1. [Step-by-step implementation approach]
-2. [What to modify vs. what to create new]
-3. [Testing strategy]
-
-## Constraints
-- Must follow existing command pattern
-- Must not break existing functionality
-- Must match existing code style (from AGENTS.md)
-```
-
-### Step 3.2: Reference AGENTS.md in your requirements
-
-Example:
-```markdown
-## Implementation Plan
-1. Add properties to Book model (Models/Book.cs)
-2. Add methods to BookService (Services/BookService.cs)
-3. Add command handler in Program.cs following existing pattern
-4. Update help text in ShowHelp()
-5. Follow error handling patterns from AGENTS.md
-6. Test with existing commands to ensure no breakage
-```
-
----
-
-## Part 4: Implement with AI Agent (12 minutes)
-
-Now use the agent to implement your feature.
-
-### Step 4.1: Provide context
+### Step 5.1: Write feature requirements
 
 **Prompt:**
 ```
 I want to add [FEATURE NAME] to the BookLibrary project.
 
-Context:
-- Review AGENTS.md for project conventions
-- Review requirements/[FEATURE-NAME]-REQUIREMENTS.md for requirements and implementation plan
-- Follow existing patterns in the codebase
-- Don't break existing functionality
+Write a Feature Requirements document that includes:
+1. Feature overview and user value
+2. Functional requirements (what it should do)
+3. Acceptance criteria (Given-When-Then format)
+4. CLI commands (new or modified)
+5. Error handling requirements
+6. Integration with existing code
 
-Please implement this feature.
+Reference AGENTS.md for coding conventions.
+Reference PRODUCT-REQUIREMENTS.md for existing behavior context.
+
+Before writing, ask me clarifying questions about the feature.
 ```
 
-### Step 4.2: Verify agent follows conventions
+### Step 5.2: Write implementation plan
 
-As the agent generates code, check:
-- ✅ Does it match naming conventions?
-- ✅ Does it follow existing patterns?
-- ✅ Are error messages consistent with existing ones?
-- ✅ Is the command structure similar to existing commands?
-
-### Step 4.3: Iterate if needed
-
-If the output doesn't match expectations:
-
-**DON'T:** Edit code directly
-
-**DO:** Update your requirements or AGENTS.md with more clarity:
-
-```markdown
-## Command Output Format
-All list commands should use this format:
+**Prompt:**
 ```
-ID: [guid]
-Title: [title]
-Author: [author]
-[other fields]
-[blank line]
+Based on the feature requirements, create an Implementation Plan:
+
+1. Files to modify (list each with what changes)
+2. New files to create
+3. Step-by-step implementation order
+4. New unit tests needed
+5. Existing tests that might need updates
+6. Verification steps
+
+Keep each step small enough to verify independently.
 ```
 
-Match the format used by the existing 'list' command.
-```
-
-Then: "Regenerate the list command using the format specified in AGENTS.md."
+Save to: `/02-brownfield/BookLibrary/requirements/[FEATURE-NAME]-REQUIREMENTS.md`
 
 ---
 
-## Part 5: Test & Verify (8 minutes)
+## Part 6: Implement Feature with Tests (12 minutes)
 
-### Step 5.1: Build the updated project
+### Step 6.1: Generate feature code AND tests together
+
+**Prompt:**
+```
+Implement [FEATURE NAME] based on:
+- AGENTS.md for coding conventions
+- requirements/[FEATURE-NAME]-REQUIREMENTS.md for requirements and implementation plan
+
+Generate:
+1. The feature implementation code
+2. Unit tests for the new functionality
+3. Any updates to existing tests if needed
+
+Follow the implementation plan step by step.
+```
+
+### Step 6.2: Verify agent follows conventions
+
+As the agent generates code, check:
+- ✅ Does it match naming conventions from AGENTS.md?
+- ✅ Does it follow existing patterns?
+- ✅ Are error messages consistent?
+- ✅ Are tests following the same style as existing tests?
+
+### Step 6.3: Iterate if needed
+
+If output doesn't match expectations:
+
+**DON'T:** Edit code directly
+
+**DO:** Clarify requirements or AGENTS.md, then regenerate:
+```
+The error messages should follow this format: "[Command] failed: [reason]"
+Please regenerate the error handling to match this pattern.
+```
+
+---
+
+## Part 7: Build and Test (8 minutes)
+
+### Step 7.1: Build the project
 
 ```bash
 cd /02-brownfield/BookLibrary
 dotnet build
 ```
 
-**Fix any compilation errors** by asking agent:
+**Fix any compilation errors:**
 ```
 There's a compilation error in [file]. Please fix it following AGENTS.md conventions.
 ```
 
-### Step 5.2: Test new functionality
+### Step 7.2: Run ALL unit tests
+
+```bash
+dotnet test
+```
+
+✅ **All tests must pass** - both existing and new tests
+
+### Step 7.3: Manual testing
 
 Test your new feature:
 ```bash
-# Test the new feature
 dotnet run -- [your-new-command] [args]
 ```
 
-### Step 5.3: Regression test existing features
+### Step 7.4: Regression test existing features
 
 **Critical:** Make sure you didn't break anything!
 
@@ -332,38 +405,41 @@ dotnet run -- [your-new-command] [args]
 dotnet run -- add "Regression Test" "Test Author" "999"
 dotnet run -- list
 dotnet run -- search title "Regression"
+dotnet run -- checkout [book-id]
+dotnet run -- return [book-id]
 ```
 
 **If anything breaks:**
-- Note what broke
-- Was it because your requirements were unclear?
+- Check if existing tests caught it (they should!)
 - Was the implementation plan missing steps?
-- Or because the agent didn't follow existing patterns?
-- Fix by refining AGENTS.md or requirements, then regenerate
+- Did the agent not follow existing patterns?
+- Fix by refining requirements, then regenerate
 
 ---
 
-## Part 6: Reflect (5 minutes)
+## Part 8: Reflect (5 minutes)
+
+## Part 8: Reflect (5 minutes)
 
 ### Discussion Questions
 
-1. **How was this different from greenfield?**
+1. **How did documenting existing requirements first help?**
+   - Did it reveal assumptions or edge cases?
+   - Did it make feature planning easier?
+
+2. **How valuable was creating tests before adding features?**
+   - Did they catch any regressions?
+   - Did they give you confidence to make changes?
+
+3. **How was this different from greenfield?**
    - More constraints? More context needed?
 
-2. **Did having AGENTS.md help?**
+4. **Did having AGENTS.md help?**
    - Would it have been harder without it?
    - What should have been in AGENTS.md but wasn't?
 
-3. **How much time did you spend understanding vs. implementing?**
+5. **How much time did you spend understanding vs. implementing?**
    - Is this realistic for real brownfield work?
-
-4. **What patterns did you discover?**
-   - Were they obvious?
-   - Should they be documented?
-
-5. **Did the implementation plan help?**
-   - Did it guide the agent effectively?
-   - What was missing?
 
 6. **Did the agent follow existing patterns automatically?**
    - When did it diverge?
