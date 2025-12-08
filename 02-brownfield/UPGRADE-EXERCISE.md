@@ -336,6 +336,68 @@ for edge cases that aren't currently tested.
 - Apply collection expressions everywhere
 - Use `nameof` for exception messages
 
+### Challenge 4: Generate Architecture Diagrams
+
+Use AI agents to create Mermaid diagrams that visualize the codebase:
+
+**Class Diagram Prompt:**
+```
+Analyze the LegacyInventory project and create a Mermaid class diagram showing:
+1. All classes and their relationships
+2. Key properties and methods
+3. Inheritance and composition relationships
+
+Format as a ```mermaid code block I can add to the README.
+```
+
+**Sequence Diagram Prompt:**
+```
+Create a Mermaid sequence diagram showing the flow when a user runs:
+  dotnet run -- update-stock 1 -5 Sale "Customer order"
+
+Show interactions between Program, InventoryService, Product, and StockTransaction.
+```
+
+**Component Diagram Prompt:**
+```
+Create a Mermaid flowchart showing the high-level architecture:
+1. CLI layer (Program.cs)
+2. Service layer (InventoryService)
+3. Model layer (Product, StockTransaction)
+4. Persistence layer (JSON files)
+
+Show data flow between components.
+```
+
+**Example Output:**
+```mermaid
+classDiagram
+    class Product {
+        +int Id
+        +string Name
+        +string SKU
+        +decimal Price
+        +int QuantityInStock
+        +int ReorderLevel
+        +UpdateStock(int quantity)
+    }
+    class StockTransaction {
+        +int Id
+        +int ProductId
+        +int QuantityChange
+        +TransactionType Type
+        +DateTime Timestamp
+    }
+    class InventoryService {
+        +AddProduct(Product)
+        +UpdateStock(int, int, TransactionType)
+        +GetLowStockProducts(int)
+    }
+    InventoryService --> Product : manages
+    InventoryService --> StockTransaction : records
+    StockTransaction --> Product : references
+```
+
 ---
 
 ## Resources
