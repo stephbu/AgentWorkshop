@@ -123,7 +123,40 @@ Add this section to your AGENTS.md:
 
 ## Part 3: Perform the Modernization (20 minutes)
 
-### Step 3.1: Create modernization plan with agent
+### Step 3.1: Generate a Product Requirements Document
+
+Before making changes, use the agent to retroactively document what the system does. This helps you understand the codebase and creates a baseline for the modernization.
+
+**Prompt:**
+```
+Analyze this LegacyInventory codebase and generate a Product Requirements Document (PRD) that describes:
+
+1. **Purpose** - What problem does this system solve?
+2. **Users** - Who uses this system?
+3. **Features** - What can users do with it?
+4. **Functional Requirements** - List each capability in detail
+5. **Non-Functional Requirements** - Performance, reliability, etc.
+6. **Data Model** - What entities exist and how do they relate?
+7. **CLI Interface** - Document all commands and their parameters
+
+Before generating, ask me clarifying questions about:
+- The intended use cases
+- Any undocumented business rules
+- Edge cases you're unsure about
+- Assumptions you're making
+
+Format as a PRODUCT-REQUIREMENTS.md file.
+```
+
+**Key Questions the Agent Might Ask:**
+- "Should the system support concurrent users, or is single-user acceptable?"
+- "What happens when stock goes negative - is that allowed for backorders?"
+- "Are there price change restrictions or audit requirements?"
+- "What is the expected data volume - hundreds or millions of products?"
+
+💡 **Tip:** Answer these questions thoughtfully. The agent's questions often reveal edge cases you hadn't considered!
+
+### Step 3.2: Create modernization plan with agent
 
 **Prompt:**
 ```
@@ -139,7 +172,7 @@ Create a phased modernization plan that:
 Break this into small, testable steps. After each step, I should be able to run tests.
 ```
 
-### Step 3.2: Execute modernization - Language version first
+### Step 3.3: Execute modernization - Language version first
 
 **Prompt:**
 ```
@@ -162,7 +195,7 @@ dotnet test LegacyInventory.sln
 
 ✅ All tests must pass before proceeding!
 
-### Step 3.3: Execute modernization - Dependencies
+### Step 3.4: Execute modernization - Dependencies
 
 **Prompt:**
 ```
@@ -185,7 +218,7 @@ dotnet build LegacyInventory.sln
 dotnet test LegacyInventory.sln
 ```
 
-### Step 3.4: Modernize code (optional)
+### Step 3.5: Modernize code (optional)
 
 **Prompt:**
 ```
@@ -225,7 +258,7 @@ After:
 ArgumentNullException.ThrowIfNull(product, nameof(productId));
 ```
 
-### Step 3.5: Migrate JSON library (optional advanced)
+### Step 3.6: Migrate JSON library (optional advanced)
 
 **Prompt:**
 ```
