@@ -243,11 +243,14 @@ Work with your GitHub admin to:
 
 By the end of this workshop, participants will be able to:
 
-1. **Use AGENTS.md** to document project conventions and guide AI agents
-2. **Write effective Product Requirements and Implementation Plans** that produce quality code
-3. **Apply requirements-first development** in both new and existing projects
-4. **Work efficiently with AI agents** to accelerate development
-5. **Balance automation with oversight** - knowing when to iterate vs. edit
+1. **Set up and configure** GitHub Copilot Agent Mode for optimal development
+2. **Create and maintain AGENTS.md** files to guide AI-assisted development
+3. **Write effective Product Requirements** documents that produce quality code
+4. **Create Implementation Plans** that translate requirements into technical designs
+5. **Apply requirements-first workflows** in both greenfield and brownfield projects
+6. **Use prompt engineering best practices** for effective AI collaboration
+7. **Troubleshoot common issues** with agent-driven development
+8. **(Optional)** Configure MCP servers for GitHub/Azure DevOps integration
 
 ---
 

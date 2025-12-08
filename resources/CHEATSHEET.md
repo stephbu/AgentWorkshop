@@ -2,6 +2,28 @@
 
 Quick reference for common tasks and patterns.
 
+## Table of Contents
+
+- [Essential Files](#essential-files)
+- [AGENTS.md Quick Template](#agentsmd-quick-template)
+- [Requirements Quick Template](#requirements-quick-template)
+- [Common Prompts](#common-prompts)
+- [Example Prompt Instructions](#example-prompt-instructions)
+- [CLI Command Pattern (C#)](#cli-command-pattern-c)
+- [Test Pattern (xUnit)](#test-pattern-xunit)
+- [Error Handling Patterns](#error-handling-patterns)
+- [Git Commands for Workshop](#git-commands-for-workshop)
+- [.NET CLI Quick Reference](#net-cli-quick-reference)
+- [VS Code Shortcuts](#vs-code-shortcuts)
+- [GitHub Copilot Tips](#github-copilot-tips)
+- [Debugging Checklist](#debugging-checklist)
+- [Common Gotchas](#common-gotchas)
+- [MCP Server Commands (Optional)](#mcp-server-commands-optional)
+- [Workshop Workflow Summary](#workshop-workflow-summary)
+- [When You're Stuck](#when-youre-stuck)
+- [Key Principles](#key-principles)
+- [Resources](#resources)
+
 ---
 
 ## Essential Files
@@ -91,19 +113,13 @@ $ command example
 
 ### Ask Questions First!
 
-**Before implementing anything, ask:**
+**Before implementing anything, ask the agent for help:**
 
-```
-"What information do you need to implement this feature?"
-
-"What should I include in AGENTS.md for this type of project?"
-
-"What edge cases should I consider?"
-
-"Are there any security or performance concerns?"
-
-"Can you suggest a good structure for this feature?"
-```
+- `"What information do you need to implement this feature?"`
+- `"What should I include in AGENTS.md for this type of project?"`
+- `"What edge cases should I consider?"`
+- `"Are there any security or performance concerns?"`
+- `"Can you suggest a good structure for this feature?"`
 
 **The agent is your pair programmer - have a conversation!**
 
@@ -141,13 +157,20 @@ and potential improvements."
 
 ### Starting a New Project
 
+**Step 1: Ask for guidance**
 ```
-"Help me create an AGENTS.md for a C# .NET 8.0 console application.
-What sections should I include?"
+Help me create an AGENTS.md for a C# .NET 8.0 console application.
+What sections should I include?
+```
 
+**Step 2: Create structure**
+```
 Create a new C# .NET 8.0 console application with this structure:
 [describe structure]
+```
 
+**Step 3: Generate foundation**
+```
 Generate AGENTS.md documenting the conventions based on our discussion.
 Don't implement features yet—just scaffold.
 ```
