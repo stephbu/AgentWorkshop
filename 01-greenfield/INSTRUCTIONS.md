@@ -120,7 +120,7 @@ and guess whether the next card will be higher or lower in value.
 
 ## Example Code Style
 
-\`\`\`csharp
+```csharp
 namespace HighLow.Models;
 
 /// <summary>
@@ -145,7 +145,7 @@ public record Card(Suit Suit, int Value)
         _ => '?'
     };
 }
-\`\`\`
+```
 ```
 
 ### Step 1.3: Review and refine
@@ -194,7 +194,7 @@ based on accuracy, speed, and building streaks.
 
 ### Start
 **Display:**
-\`\`\`
+```
 ╔════════════════════════════════════════╗
 ║         HIGH/LOW CARD GAME             ║
 ╠════════════════════════════════════════╣
@@ -209,12 +209,12 @@ based on accuracy, speed, and building streaks.
 ╚════════════════════════════════════════╝
 
 Press ENTER to start...
-\`\`\`
+```
 
 ### Gameplay
 **Display:**
-\`\`\`
-Cards remaining: 45    Score: 125    Streak: 3 ��
+```
+Cards remaining: 45    Score: 125    Streak: 3 🔥
 
   ┌─────────┐
   │ 7       │
@@ -225,11 +225,11 @@ Cards remaining: 45    Score: 125    Streak: 3 ��
   └─────────┘
 
 [H]igher or [L]ower? (Q to quit): _
-\`\`\`
+```
 
 ### Result
 **Display (correct):**
-\`\`\`
+```
   ┌─────────┐      ┌─────────┐
   │ 7       │  →   │ J       │
   │         │      │         │
@@ -240,11 +240,11 @@ Cards remaining: 45    Score: 125    Streak: 3 ��
 
 ✓ Correct! Jack of Hearts (11) is HIGHER than 7 of Spades (7)
   +10 base  +4 speed bonus  x2.0 streak = 28 points!
-\`\`\`
+```
 
 ### Game Over
 **Display:**
-\`\`\`
+```
 ╔════════════════════════════════════════╗
 ║            GAME OVER!                  ║
 ╠════════════════════════════════════════╣
@@ -258,7 +258,7 @@ Cards remaining: 45    Score: 125    Streak: 3 ��
 ╚════════════════════════════════════════╝
 
 Play again? (Y/N): _
-\`\`\`
+```
 
 ## Acceptance Criteria
 
@@ -405,7 +405,7 @@ Issues will arise. Practice fixing them by **updating requirements**, not editin
 ## Card Display Format
 
 Display cards in a 9x11 character box:
-\`\`\`
+```
 ┌─────────┐
 │ A       │
 │         │
@@ -413,7 +413,7 @@ Display cards in a 9x11 character box:
 │         │
 │       A │
 └─────────┘
-\`\`\`
+```
 - Value in top-left (left-aligned)
 - Value in bottom-right (right-aligned)  
 - Suit symbol centered
