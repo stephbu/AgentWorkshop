@@ -1,6 +1,6 @@
 # Brownfield Lab: Extending Existing Code
 
-**Duration:** ~85 minutes  
+**Duration:** ~95 minutes  
 **Goal:** Learn to apply requirements-first development to an existing codebase you didn't write.
 
 ---
@@ -12,9 +12,11 @@ In this lab, you will:
 2. Create an `AGENTS.md` file to document conventions
 3. Retroactively write Product Requirements for existing functionality
 4. Add unit tests for existing code (establish baseline)
-5. Write Feature Requirements and Implementation Plan for a new feature
-6. Implement the feature with AI agents, including new tests
-7. Verify all tests pass and no regressions occurred
+5. Write Feature Requirements for a new feature
+6. Create an Implementation Plan for the feature
+7. Implement the feature using the plan, with AI agents
+8. Build, test, and verify no regressions
+9. Reflect on the process
 
 ---
 
@@ -233,7 +235,35 @@ Does the checkout command actually enforce any limits on how many books a user c
 What happens if someone tries to add a book with a duplicate ISBN?
 ```
 
-Save to: `/02-brownfield/BookLibrary/requirements/PRODUCT-REQUIREMENTS.md`
+Save to: `/02-brownfield/BookLibrary/docs/PRODUCT-REQUIREMENTS.md`
+
+### Step 3.3: Review the requirements with the agent
+
+Use the agent to review the generated requirements. Try these prompts:
+
+**Check for accuracy:**
+```
+Compare these requirements against the actual code. 
+Are there any behaviors documented that don't match the implementation?
+```
+
+**Check for completeness:**
+```
+What existing functionality is missing from these requirements?
+Are there any edge cases or error conditions not documented?
+```
+
+**Check for assumptions:**
+```
+What assumptions are baked into these requirements?
+What business rules are implied but not explicitly stated?
+```
+
+**Overall review:**
+```
+Review my PRODUCT-REQUIREMENTS.md for accuracy and completeness.
+This will be our baseline for adding new features.
+```
 
 ---
 
@@ -271,7 +301,7 @@ dotnet test
 
 ---
 
-## Part 5: Choose a Feature and Write Requirements (10 minutes)
+## Part 5: Write Feature Requirements (10 minutes)
 
 Now you're ready to add a new feature. Select ONE:
 
@@ -289,11 +319,22 @@ Export the book list to a CSV file.
 
 ### Step 5.1: Write feature requirements
 
-**Prompt:**
+**💡 Pro Tip: Let the agent help you write comprehensive requirements!**
+
+**Start with a question:**
 ```
 I want to add [FEATURE NAME] to the BookLibrary project.
+Before writing requirements, ask me clarifying questions about:
+- The user experience I want
+- Edge cases I should consider
+- How it should integrate with existing features
+```
 
-Write a Feature Requirements document that includes:
+Answer the agent's questions to collaboratively build requirements.
+
+**Then generate the requirements:**
+```
+Based on our discussion, write a Feature Requirements document that includes:
 1. Feature overview and user value
 2. Functional requirements (what it should do)
 3. Acceptance criteria (Given-When-Then format)
@@ -303,16 +344,62 @@ Write a Feature Requirements document that includes:
 
 Reference AGENTS.md for coding conventions.
 Reference PRODUCT-REQUIREMENTS.md for existing behavior context.
-
-Before writing, ask me clarifying questions about the feature.
 ```
 
-### Step 5.2: Write implementation plan
+### Step 5.2: Review feature requirements with the agent
 
-**Prompt:**
+**Check for testability:**
 ```
-Based on the feature requirements, create an Implementation Plan:
+Review my feature requirements. Can each requirement be tested?
+Identify any that are vague or unmeasurable.
+```
 
+**Check for integration:**
+```
+How does this feature interact with existing functionality?
+Are there any conflicts or dependencies I should address?
+```
+
+**Check for completeness:**
+```
+What edge cases or error scenarios are missing from my requirements?
+What could break this implementation?
+```
+
+**Overall review:**
+```
+Review my feature requirements for clarity and completeness.
+Suggest improvements to make it easier for an AI agent to implement.
+```
+
+Save to: `/02-brownfield/BookLibrary/docs/[FEATURE-NAME]-REQUIREMENTS.md`
+
+---
+
+## Part 6: Create Implementation Plan (10 minutes)
+
+Before generating code, create a detailed implementation plan.
+
+### Step 6.1: Generate implementation plan
+
+**💡 Pro Tip: Let the agent help build the plan!**
+
+**Start with a question:**
+```
+Based on my feature requirements, AGENTS.md, and PRODUCT-REQUIREMENTS.md,
+help me create an implementation plan. What components need to change?
+In what order should changes be made? What are the dependencies?
+```
+
+The agent will help you think through:
+- Files to modify vs. files to create
+- Order of changes (what needs to exist first)
+- Impact on existing code
+- Testing strategy for new AND existing functionality
+
+**Generate the plan:**
+```
+Create an Implementation Plan that includes:
 1. Files to modify (list each with what changes)
 2. New files to create
 3. Step-by-step implementation order
@@ -323,53 +410,94 @@ Based on the feature requirements, create an Implementation Plan:
 Keep each step small enough to verify independently.
 ```
 
-Save to: `/02-brownfield/BookLibrary/requirements/[FEATURE-NAME]-REQUIREMENTS.md`
+### Step 6.2: Review the implementation plan
+
+**Check for dependencies:**
+```
+Review my implementation plan. Are the dependencies between 
+changes clear? Will the agent know what to modify first?
+```
+
+**Check for regression risk:**
+```
+Which existing functionality is at risk with these changes?
+How will we verify nothing breaks?
+```
+
+**Check for completeness:**
+```
+What's missing from my implementation plan? What decisions
+should I make before the agent starts coding?
+```
+
+**Overall review:**
+```
+Review my IMPLEMENTATION-PLAN.md for clarity and completeness.
+Will an AI agent be able to follow this plan step-by-step?
+```
+
+Save to: `/02-brownfield/BookLibrary/docs/[FEATURE-NAME]-IMPLEMENTATION-PLAN.md`
 
 ---
 
-## Part 6: Implement Feature with Tests (12 minutes)
+## Part 7: Implement Feature with Tests (12 minutes)
 
-### Step 6.1: Generate feature code AND tests together
+Now let the AI agent implement your feature using the implementation plan!
 
-**Prompt:**
+### Step 7.1: Execute the implementation plan
+
+**💡 Pro Tip: Use the implementation plan to drive development!**
+
+Rather than giving the agent a single large prompt, use your implementation plan to guide step-by-step execution.
+
+**Start with the first step:**
 ```
-Implement [FEATURE NAME] based on:
-- AGENTS.md for coding conventions
-- requirements/[FEATURE-NAME]-REQUIREMENTS.md for requirements and implementation plan
-
-Generate:
-1. The feature implementation code
-2. Unit tests for the new functionality
-3. Any updates to existing tests if needed
-
-Follow the implementation plan step by step.
+Review my IMPLEMENTATION-PLAN.md. Let's start with Step 1.
+Follow conventions in AGENTS.md.
 ```
 
-### Step 6.2: Verify agent follows conventions
-
-As the agent generates code, check:
-- ✅ Does it match naming conventions from AGENTS.md?
-- ✅ Does it follow existing patterns?
-- ✅ Are error messages consistent?
-- ✅ Are tests following the same style as existing tests?
-
-### Step 6.3: Iterate if needed
-
-If output doesn't match expectations:
-
-**DON'T:** Edit code directly
-
-**DO:** Clarify requirements or AGENTS.md, then regenerate:
+**Continue step by step:**
 ```
-The error messages should follow this format: "[Command] failed: [reason]"
-Please regenerate the error handling to match this pattern.
+Step 1 is complete. Now implement Step 2 from IMPLEMENTATION-PLAN.md.
+Follow all conventions in AGENTS.md.
+Ensure compatibility with existing code in PRODUCT-REQUIREMENTS.md.
+```
+
+**Ask the agent to verify progress:**
+```
+Review what we've built so far against IMPLEMENTATION-PLAN.md.
+What steps are complete? What's remaining?
+```
+
+### Step 7.2: Iterate through each step
+
+Work through your implementation plan systematically:
+
+**For each step, prompt:**
+```
+Implement [Step X] from IMPLEMENTATION-PLAN.md.
+Reference AGENTS.md for coding conventions.
+Reference [FEATURE-NAME]-REQUIREMENTS.md for expected behavior.
+Include unit tests for this step.
+```
+
+**If the agent gets stuck:**
+```
+What's blocking progress on this step? Do you need clarification
+on any requirements or conventions before proceeding?
+```
+
+**After completing a step:**
+```
+Show me a summary of what was implemented in this step.
+Are there any deviations from the implementation plan I should know about?
 ```
 
 ---
 
-## Part 7: Build and Test (8 minutes)
+## Part 8: Build and Test (8 minutes)
 
-### Step 7.1: Build the project
+### Step 8.1: Build the project
 
 ```bash
 cd /02-brownfield/BookLibrary
@@ -381,7 +509,7 @@ dotnet build
 There's a compilation error in [file]. Please fix it following AGENTS.md conventions.
 ```
 
-### Step 7.2: Run ALL unit tests
+### Step 8.2: Run ALL unit tests
 
 ```bash
 dotnet test
@@ -389,14 +517,14 @@ dotnet test
 
 ✅ **All tests must pass** - both existing and new tests
 
-### Step 7.3: Manual testing
+### Step 8.3: Manual testing
 
 Test your new feature:
 ```bash
 dotnet run -- [your-new-command] [args]
 ```
 
-### Step 7.4: Regression test existing features
+### Step 8.4: Regression test existing features
 
 **Critical:** Make sure you didn't break anything!
 
@@ -417,7 +545,7 @@ dotnet run -- return [book-id]
 
 ---
 
-## Part 8: Reflect (5 minutes)
+## Part 9: Reflect (5 minutes)
 
 ### Discussion Questions
 

@@ -164,9 +164,9 @@ Review my AGENTS.md for clarity and completeness.
 ```
 ---
 
-## Part 2: Write Product Requirements (10 minutes)
+## Part 2: Write Product Requirements and Implementation Plan (10 minutes)
 
-Now write requirements for what the application should do.
+Now write requirements and a plan for what the application should do.
 
 ### Step 2.1: Create requirements document
 
@@ -174,7 +174,7 @@ Create: `/01-greenfield/HighLow/docs/PRODUCT-REQUIREMENTS.md`
 
 ### Step 2.2: Write the requirements
 
-Use the [PRODUCT-REQUIREMENTS-TEMPLATE.md](./PRODUCT-REQUIREMENTS-TEMPLATE.md) or create your own.
+Use the [PRODUCT-REQUIREMENTS-TEMPLATE.md](./PRODUCT-REQUIREMENTS-TEMPLATE.md) and [IMPLEMENTATION-PLAN-TEMPLATE.md](./IMPLEMENTATION-PLAN-TEMPLATE.md) or create your own.
 
 **💡 Pro Tip: Let the agent help populate the template!**
 
@@ -329,6 +329,14 @@ Play again? (Y/N): _
 - Joker cards
 - Multi-player mode
 - Card counting hints
+
+## Implementation Plan
+1. Create Models folder with Card, Deck, Suit, GameState classes
+2. Create Services folder with GameService (game loop) and ScoringService
+3. Create Display folder with ConsoleRenderer for ASCII card art
+4. Implement main game loop in Program.cs
+5. Add unit tests for scoring logic and deck shuffling
+6. Add error handling for invalid input
 ```
 
 ### Step 2.3: Review your requirements with the agent
@@ -355,7 +363,7 @@ What could break this implementation?
 
 **Overall review:**
 ```
-Review my PRODUCT-REQUIREMENTS.md for clarity and completeness. 
+Review my HIGHLOW-REQUIREMENTS.md for clarity and completeness. 
 Suggest improvements to make it easier for an AI agent to implement.
 ```
 
@@ -418,45 +426,54 @@ Will an AI agent be able to follow this plan step-by-step?
 
 ## Part 4: Generate Implementation (20 minutes)
 
-Now let the AI agent build your application!
+Now let the AI agent build your application using your implementation plan!
 
-### Step 4.1: Initial scaffold
+### Step 4.1: Execute the implementation plan
 
-**Prompt to agent:**
+**💡 Pro Tip: Use the implementation plan to drive development!**
+
+Rather than giving the agent a single large prompt, use your implementation plan to guide step-by-step execution.
+
+**Start with the first phase:**
 ```
-Create a new C# console application following the structure defined in AGENTS.md.
-Set up the project with:
-- .NET 8.0 console app
-- xUnit testing project
-- Folder structure
-
-Don't implement features yet—just create the skeleton.
+Review the IMPLEMENTATION-PLAN.md. Let's start with Phase 1.
 ```
 
-**Expected output:**
-- `.csproj` files
-- Folder structure
-- Empty classes/interfaces
-
-### Step 4.2: Implement the feature
-
-**Prompt to agent:**
+**Continue phase by phase:**
 ```
-Implement the HighLow card game according to docs/PRODUCT-REQUIREMENTS.md
-and docs/IMPLEMENTATION-PLAN.md.
-Follow all conventions in AGENTS.md.
-Include unit tests for:
-- Card comparison logic
-- Scoring calculations (base, speed, streak)
-- Deck shuffling (use seeded random for tests)
-
-Start with the core game loop, then add the fancy display.
+Now implement Phase 2 from IMPLEMENTATION-PLAN.md.
+Follow all conventions in AGENTS.md and requirements in PRODUCT-REQUIREMENTS.md.
 ```
 
-**Watch for:**
-- Does the agent follow your AGENTS.md conventions?
-- Are card symbols displaying correctly?
-- Is the scoring formula implemented correctly?
+**Ask the agent to verify progress:**
+```
+Review what we've built so far against IMPLEMENTATION-PLAN.md.
+What phases are complete? What's remaining?
+```
+
+### Step 4.2: Iterate through each phase
+
+Work through your implementation plan systematically:
+
+**For each phase, prompt:**
+```
+Implement [Phase X: Phase Name] from IMPLEMENTATION-PLAN.md.
+Reference AGENTS.md for coding conventions.
+Reference PRODUCT-REQUIREMENTS.md for expected behavior.
+Include unit tests for this phase.
+```
+
+**If the agent gets stuck:**
+```
+What's blocking progress on this phase? Do you need clarification 
+on any requirements or conventions before proceeding?
+```
+
+**After completing a phase:**
+```
+Show me a summary of what was implemented in this phase.
+Are there any deviations from the implementation plan I should know about?
+```
 
 ### Step 4.3: Build and test
 
