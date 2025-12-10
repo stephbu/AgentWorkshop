@@ -105,25 +105,6 @@ Required on:
 - All public methods and properties
 - Complex internal methods
 
-**Example:**
-```csharp
-/// <summary>
-/// Manages the game loop and player interactions.
-/// </summary>
-public class GameService
-{
-    /// <summary>
-    /// Starts a new game with a shuffled deck.
-    /// </summary>
-    /// <param name="seed">Optional seed for reproducible shuffling.</param>
-    /// <returns>The initial game state.</returns>
-    public GameState StartNewGame(int? seed = null)
-    {
-        // ...
-    }
-}
-```
-
 ### Project Documentation
 
 Store all project documentation in the `/docs` folder using Markdown format.
@@ -162,15 +143,7 @@ Store all project documentation in the `/docs` folder using Markdown format.
 - Never swallow exceptions silently
 
 ### Result Pattern (Optional)
-For expected failures (validation, not found), consider:
-```csharp
-public class Result<T>
-{
-    public bool IsSuccess { get; init; }
-    public T? Value { get; init; }
-    public string? Error { get; init; }
-}
-```
+For expected failures (validation, not found), consider using a Result<T> type with IsSuccess, Value, and Error properties.
 
 ### Logging
 - Log errors with context (what operation failed, relevant IDs)
@@ -181,48 +154,81 @@ public class Result<T>
 
 ## Testing Standards
 
+### Test Classification
+
+Classify all unit tests as either **Fast** or **Slow**:
+
+**Fast Tests:**
+- Complete in milliseconds
+- No I/O operations (file, network, database)
+- No async/await delays
+- No intensive computation
+- Run in-memory only
+- Should make up the majority of tests
+
+**Slow Tests:**
+- Involve file system, network, or database I/O
+- Include async operations with real delays
+- Require intensive computation
+- Integration tests that cross boundaries
+
+Use test categories/traits to mark slow tests so they can be excluded from quick test runs.
+
 ### Test Organization
 - One test class per production class
 - Test class name: `[ClassUnderTest]Tests`
 - Test file location: mirrors source structure in `/tests`
 
 ### Test Naming
-```csharp
-[Method]_[Scenario]_[ExpectedResult]
+Use the pattern: `[Method]_[Scenario]_[ExpectedResult]`
 
-// Examples:
-public void CompareCards_HigherCard_ReturnsPositive()
-public void CalculateScore_WithStreak_AppliesMultiplier()
-public void ShuffleDeck_WithSeed_ProducesDeterministicOrder()
-```
+Examples:
+- `CompareCards_HigherCard_ReturnsPositive`
+- `CalculateScore_WithStreak_AppliesMultiplier`
+- `ShuffleDeck_WithSeed_ProducesDeterministicOrder`
 
 ### Test Structure (AAA Pattern)
-```csharp
-[Fact]
-public void CalculateScore_WithStreak_AppliesMultiplier()
-{
-    // Arrange
-    var scoringService = new ScoringService();
-    var streak = 3;
-    var elapsedSeconds = 2.0;
-
-    // Act
-    var result = scoringService.CalculateScore(
-        isCorrect: true, 
-        elapsedSeconds: elapsedSeconds, 
-        currentStreak: streak);
-
-    // Assert
-    Assert.True(result > 10); // Base is 10, should be higher with streak
-    Assert.Equal(38, result); // (10 + 5) * 2.5 = 37.5 → 38
-}
-```
+Use Arrange-Act-Assert pattern:
+- **Arrange:** Set up test data and dependencies
+- **Act:** Execute the method under test
+- **Assert:** Verify the expected outcome
 
 ### Mocking
 - Mock external dependencies (file I/O, random number generation)
 - Use a mocking framework (e.g., Moq, NSubstitute) if needed
 - Don't mock the class under test
 - Use seeded Random for deterministic shuffle tests
+
+### Test After Every Change
+
+**Run affected tests after each code change:**
+- Before committing, run all tests that cover modified code
+- Run Fast tests continuously during development
+- Run full test suite (including Slow tests) before pull requests
+- Fix broken tests immediately—don't accumulate test debt
+
+**Verify test coverage for changes:**
+- New code must have corresponding tests
+- Modified code must have tests updated if behavior changed
+- Deleted code should have associated tests removed
+
+### Test Library Maintenance
+
+**Keep the test suite healthy:**
+- Remove obsolete tests when features are removed
+- Update tests when requirements change
+- Refactor test code to reduce duplication
+- Keep tests independent—no shared mutable state between tests
+
+**Organize tests for discoverability:**
+- Group related tests in the same test class
+- Use descriptive test names that explain the scenario
+- Add comments for complex test setups
+
+**Monitor test quality:**
+- Tests should fail for the right reasons
+- Avoid brittle tests that break on unrelated changes
+- Each test should verify one specific behavior
 
 ---
 
@@ -248,139 +254,13 @@ When working in this codebase:
 
 ---
 
-## Example: HighLow Card Game
+## Checklist
 
-Below is an example AGENTS.md for a HighLow card guessing game:
+Before finalizing your AGENTS.md, verify:
 
-```markdown
-# AGENTS.md
-
-## Project Overview
-A command-line high/low card guessing game. Players see a card and guess 
-whether the next card will be higher or lower in value. Score based on 
-accuracy, speed, and streak multipliers.
-
-## Tech Stack
-- Language: C# 12
-- Framework: .NET 8.0
-- Testing: xUnit
-- No external dependencies required
-
-## Project Structure
-/HighLow
-  /src
-    /HighLow
-      /Models        - Card, Deck, Suit, GameState, GameStatistics
-      /Services      - GameService, ScoringService, DeckService
-      /Display       - ConsoleRenderer for ASCII card art
-      Program.cs
-  /tests
-    /HighLow.Tests
-      /Models        - CardTests, DeckTests
-      /Services      - ScoringServiceTests, GameServiceTests
-
-## Game-Specific Conventions
-
-### Card Representation
-- Use Unicode suit symbols: ♠ ♥ ♦ ♣
-- Card values: A=1, 2-10, J=11, Q=12, K=13
-- Aces are always low (value 1)
-- Use records for immutable card representation
-
-### Scoring Rules
-- Base points per correct guess: 10
-- Speed bonus: max 5 points (decreases 1 point per second after 3 seconds)
-- Streak multiplier: 1.0 + (streak_count × 0.5)
-- Ties (same value): 0 points, streak continues
-
-### Display Conventions
-- Cards displayed in ASCII art boxes with box-drawing characters
-- Use ✓ for correct, ✗ for incorrect
-- Show running score, cards remaining, and current streak
-- Fire emoji (🔥) for streaks of 3+
-
-## Example Code
-
-### Card Model
-```csharp
-namespace HighLow.Models;
-
-public enum Suit { Spades, Hearts, Diamonds, Clubs }
-
-public record Card(Suit Suit, int Value)
-{
-    public string Display => $"{ValueSymbol}{SuitSymbol}";
-    
-    public string ValueSymbol => Value switch
-    {
-        1 => "A", 11 => "J", 12 => "Q", 13 => "K",
-        _ => Value.ToString()
-    };
-    
-    public char SuitSymbol => Suit switch
-    {
-        Suit.Spades => '♠',
-        Suit.Hearts => '♥',
-        Suit.Diamonds => '♦',
-        Suit.Clubs => '♣',
-        _ => '?'
-    };
-}
-```
-
-### Scoring Service
-```csharp
-namespace HighLow.Services;
-
-public class ScoringService
-{
-    private const int BasePoints = 10;
-    private const int MaxSpeedBonus = 5;
-    private const double StreakMultiplierIncrement = 0.5;
-    
-    public int CalculateScore(bool isCorrect, double elapsedSeconds, int currentStreak)
-    {
-        if (!isCorrect) return 0;
-        
-        var speedBonus = Math.Max(0, MaxSpeedBonus - (int)(elapsedSeconds - 3));
-        var multiplier = 1.0 + (currentStreak * StreakMultiplierIncrement);
-        
-        return (int)Math.Round((BasePoints + speedBonus) * multiplier);
-    }
-}
-```
-
-## Testing Guidelines
-
-### Deterministic Tests
-Use seeded Random for shuffle tests:
-```csharp
-[Fact]
-public void Shuffle_WithSameSeed_ProducesSameOrder()
-{
-    var deck1 = new DeckService(seed: 42);
-    var deck2 = new DeckService(seed: 42);
-    
-    var cards1 = deck1.GetShuffledDeck();
-    var cards2 = deck2.GetShuffledDeck();
-    
-    Assert.Equal(cards1, cards2);
-}
-```
-
-### Scoring Test Examples
-```csharp
-[Theory]
-[InlineData(true, 2.0, 0, 15)]   // Fast, no streak: 10 + 5 = 15
-[InlineData(true, 5.0, 0, 10)]   // Slow, no streak: 10 + 0 = 10
-[InlineData(true, 2.0, 3, 38)]   // Fast, streak 3: (10+5) * 2.5 = 37.5 → 38
-[InlineData(false, 1.0, 5, 0)]   // Wrong guess: always 0
-public void CalculateScore_VariousScenarios_ReturnsExpected(
-    bool isCorrect, double seconds, int streak, int expected)
-{
-    var service = new ScoringService();
-    var result = service.CalculateScore(isCorrect, seconds, streak);
-    Assert.Equal(expected, result);
-}
-```
-```
+- [ ] Project overview clearly describes purpose
+- [ ] Tech stack is accurate and complete
+- [ ] Project structure reflects actual layout
+- [ ] Coding conventions are specific and actionable
+- [ ] Testing standards include Fast/Slow classification
+- [ ] Instructions for agents are clear and prioritized

@@ -244,7 +244,27 @@ If modifying the Book model:
 
 ## Testing Strategy
 
-*Since tests don't exist yet, define the strategy for adding them:*
+*Since tests may not exist yet, define the strategy for adding them:*
+
+### Test Classification
+
+Classify all unit tests as either **Fast** or **Slow**:
+
+**Fast Tests:**
+- Complete in milliseconds
+- No I/O operations (file, network, database)
+- No async/await delays
+- No intensive computation
+- Run in-memory only
+- Should make up the majority of tests
+
+**Slow Tests:**
+- Involve file system, network, or database I/O
+- Include async operations with real delays
+- Require intensive computation
+- Integration tests that cross boundaries
+
+Use test categories/traits to mark slow tests so they can be excluded from quick test runs.
 
 ### When Tests Should Be Added
 - For any new feature with complex logic
@@ -253,18 +273,47 @@ If modifying the Book model:
 
 ### Proposed Testing Approach
 - Use xUnit (common for .NET)
-- Create `/tests/BookLibrary.Tests/` folder
-- Test class per production class: `BookServiceTests`, etc.
+- Create `/tests/[ProjectName].Tests/` folder
+- Test class per production class
 - Use AAA pattern (Arrange-Act-Assert)
 
 ### Test Naming
-```
-[Method]_[Scenario]_[ExpectedResult]
+Use the pattern: `[Method]_[Scenario]_[ExpectedResult]`
 
 Examples:
-AddBook_WithValidData_ReturnsBook
-AddBook_WithEmptyTitle_ThrowsArgumentException
-```
+- `AddBook_WithValidData_ReturnsBook`
+- `AddBook_WithEmptyTitle_ThrowsArgumentException`
+
+### Test After Every Change
+
+**Run affected tests after each code change:**
+- Before committing, run all tests that cover modified code
+- Run Fast tests continuously during development
+- Run full test suite (including Slow tests) before pull requests
+- Fix broken tests immediately—don't accumulate test debt
+
+**Verify test coverage for changes:**
+- New code must have corresponding tests
+- Modified code must have tests updated if behavior changed
+- Deleted code should have associated tests removed
+
+### Test Library Maintenance
+
+**Keep the test suite healthy:**
+- Remove obsolete tests when features are removed
+- Update tests when requirements change
+- Refactor test code to reduce duplication
+- Keep tests independent—no shared mutable state between tests
+
+**Organize tests for discoverability:**
+- Group related tests in the same test class
+- Use descriptive test names that explain the scenario
+- Add comments for complex test setups
+
+**Monitor test quality:**
+- Tests should fail for the right reasons
+- Avoid brittle tests that break on unrelated changes
+- Each test should verify one specific behavior
 
 ---
 
@@ -312,15 +361,12 @@ When working in this codebase:
 ## Documentation Standards
 
 ### XML Documentation
-Existing code lacks XML docs, but ADD them to new code:
+Existing code may lack XML docs, but ADD them to new code.
 
-```csharp
-/// <summary>
-/// [What this does]
-/// </summary>
-/// <param name="paramName">[Parameter description]</param>
-/// <returns>[What is returned]</returns>
-```
+Include:
+- Summary of what the method/class does
+- Parameter descriptions
+- Return value description
 
 ### Comments
 - Comment WHY, not WHAT (code should be self-explanatory)
@@ -344,17 +390,6 @@ Existing code lacks XML docs, but ADD them to new code:
 - Prioritize phases: Core → Nice-to-have → Polish
 - In brownfield, phases might align with existing modules/subsystems
 
-**Examples:**
-```markdown
-❌ Too Large:
-"Refactor entire authentication system" (1000+ lines, many files)
-
-✅ Right Size:
-Phase 1: "Extract auth interface" (~150 lines, 3 files)
-Phase 2: "Implement JWT provider" (~200 lines, 4 files)
-Phase 3: "Migrate existing code" (~250 lines, 5 files)
-```
-
 **Benefits:**
 - Faster, higher-quality code reviews
 - Easier to track progress
@@ -362,75 +397,6 @@ Phase 3: "Migrate existing code" (~250 lines, 5 files)
 - Agents can focus on one coherent unit
 - Team can prioritize and parallelize work
 - Lower risk when modifying existing code
-
----
-
-## Example: Adding a New Feature
-
-**Scenario:** Add book categories
-
-### Step 1: Update the model
-```csharp
-// Models/Book.cs
-public string? Category { get; set; }
-```
-
-### Step 2: Update service
-```csharp
-// Services/BookService.cs
-public Book AddBook(string title, string author, string isbn, string? category = null)
-{
-    // ... existing validation ...
-    
-    var book = new Book
-    {
-        // ... existing properties ...
-        Category = category
-    };
-    
-    // ... rest of method ...
-}
-
-public IReadOnlyList<Book> SearchByCategory(string category)
-{
-    if (string.IsNullOrWhiteSpace(category))
-        return new List<Book>().AsReadOnly();
-        
-    return _books
-        .Where(b => b.Category?.Equals(category, StringComparison.OrdinalIgnoreCase) == true)
-        .ToList()
-        .AsReadOnly();
-}
-```
-
-### Step 3: Update CLI
-```csharp
-// Program.cs - Add to switch statement
-case "category":
-    HandleSearchByCategory(bookService, args);
-    break;
-
-// Add handler
-static void HandleSearchByCategory(BookService service, string[] args)
-{
-    if (args.Length < 2)
-    {
-        Console.WriteLine("Usage: booklibrary category <category-name>");
-        return;
-    }
-    
-    var category = args[1];
-    var results = service.SearchByCategory(category);
-    
-    // ... format and display results (follow existing pattern) ...
-}
-```
-
-### Step 4: Update help text
-```csharp
-// In ShowHelp()
-Console.WriteLine("  category <name>                  - Search by category");
-```
 
 ---
 

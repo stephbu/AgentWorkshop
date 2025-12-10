@@ -44,7 +44,7 @@ Look at the project root: `/02-brownfield/BookLibrary/`
 
 ❌ **No** - This is intentional! Most brownfield projects don't have one.
 
-This is a key learning moment: **You'll need to create it.**
+This is a key learning moment: **You'll create one in Part 2** after exploring the codebase.
 
 ### Step 1.2: Understand the codebase structure
 
