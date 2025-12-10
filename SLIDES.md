@@ -26,7 +26,7 @@ Date: December 2025
 
 **Module B: Greenfield Development** (90 min)
 - Requirements-first workflow
-- Hands-on lab: Build Task Manager CLI
+- Hands-on lab: Build HighLow Card Game
 
 **Break** (15 min)
 
@@ -173,15 +173,15 @@ A markdown file that tells AI assistants about your project's conventions.
 
 **Contents:**
 ```markdown
-# Project: Task Manager CLI
+# Project: HighLow Card Game
 ## Tech Stack
 - C# 12, .NET 8.0
-- System.CommandLine for CLI
+- Console-based CLI
 
 ## Conventions
 - Use file-scoped namespaces
-- Async/await for all I/O operations
-- Repository pattern for data access
+- Records for immutable models (Card)
+- Services for game logic
 
 ## Work Unit Guidelines
 - Max reviewable change: 1 feature or 300 lines
@@ -257,15 +257,14 @@ If `/AGENTS.md` exists, Copilot reads it automatically!
 
 **Example Requirement:**
 ```markdown
-## REQ-001: Add Task
-User can add a new task with a title and optional description.
+## REQ-001: Card Display
+Game displays current card with value and suit symbol.
 
 Acceptance Criteria:
-- Task must have non-empty title
-- Title limited to 200 characters
-- Description is optional
-- System generates unique ID
-- Task initially marked as "Pending"
+- Card shows value (A, 2-10, J, Q, K)
+- Card shows suit symbol (♠ ♥ ♦ ♣)
+- Card rendered in ASCII art box
+- Display is clear and readable
 ```
 
 ---
@@ -294,22 +293,21 @@ Don't implement everything at once. Break features into:
 **Example:**
 ```markdown
 ## Architecture
-- Presentation Layer: CLI (System.CommandLine)
-- Business Logic: TaskService
-- Data Access: TaskRepository (JSON)
+- Entry Point: Program.cs
+- Game Logic: GameService
+- Deck Management: DeckService
+- Scoring: ScoringService
 
 ## Implementation Phases
-Phase 1 (High Priority): Add & List tasks
-Phase 2 (Medium): Complete & Delete tasks  
-Phase 3 (Low): Search & Filter
+Phase 1 (High Priority): Cards & Deck
+Phase 2 (Medium): Scoring & Streaks  
+Phase 3 (Low): Display & Polish
 
 Each phase = 1 reviewable PR
-- Storage: ~/.taskmanager/tasks.json
 
 ## Error Handling
-- ArgumentException for user input errors (exit 1)
-- IOException for file errors (exit 2)
-- Display user-friendly messages
+- Invalid input: reprompt (don't count as guess)
+- Ctrl+C: show final score, exit gracefully
 ```
 
 ---
@@ -379,33 +377,37 @@ dotnet --version
 
 **1. Ask Questions First:**
 ```
-✅ "What information do you need to create a task management service?"
+✅ "What information do you need to create a card game scoring service?"
 ✅ "What conventions should I document in AGENTS.md for a C# CLI app?"
-✅ "Are there any edge cases I should consider for this feature?"
+✅ "What edge cases should I consider for comparing card values?"
 ```
 **Agents can clarify requirements and suggest best practices!**
 
 **2. Be Specific with Details:**
 ```
-❌ "Create a task class"
-✅ "Create a Task class with Id (Guid), Title (string, required), 
-    Description (string, optional), Status (enum: Pending/Complete), 
-    and CreatedAt (DateTime). Follow conventions in AGENTS.md"
+❌ "Create a card class"
+✅ "Create a Card record with Suit (enum) and Value (int 1-13).
+    Include Display property showing '7♠' format.
+    Aces are value 1, J=11, Q=12, K=13. Follow AGENTS.md"
 ```
 
 **3. Provide Context:**
 ```
 ❌ "Add error handling"
-✅ "Add error handling to TaskService.AddTaskAsync that validates 
-    title is not empty and throws ArgumentException with clear 
-    message. See error handling section in AGENTS.md"
+✅ "Add input validation to the game loop that only accepts 
+    H, L, or Q keys. Invalid keys should show an error and 
+    reprompt without counting as a guess."
 ```
 
 **4. Show Examples (Few-Shot Learning):**
 ```
-✅ "Here's how I want the output formatted:
-    [ID] Task Title (Status)
-    Now implement the list command to match this format."
+✅ "Here's how I want the card displayed:
+    ┌─────────┐
+    │ 7       │
+    │    ♠    │
+    │       7 │
+    └─────────┘
+    Now implement the card renderer to match this format."
 ```
 
 **5. Break Down Complex Tasks:**
@@ -423,7 +425,7 @@ dotnet --version
 
 **Reference Documents:**
 ```
-✅ "Generate TaskService following the architecture in 
+✅ "Generate ScoringService following the architecture in 
     IMPLEMENTATION-PLAN.md and conventions in AGENTS.md"
 ```
 
@@ -622,7 +624,7 @@ Use generated code without review
 - ✅ No legacy patterns to fight
 
 **Today's Lab:**
-Build a Task Manager CLI application in C# from zero to working code
+Build a HighLow Card Game CLI in C# from zero to working code
 
 ---
 
@@ -669,18 +671,18 @@ flowchart TD
 
 ---
 
-# Slide 22: Lab 1 - Task Manager CLI
+# Slide 22: Lab 1 - HighLow Card Game
 
 ## Your Turn: Build from Scratch
 
-**Goal:** Create a working Task Manager CLI application
+**Goal:** Create a working HighLow Card Game CLI
 
 **Features to Implement:**
-- Add tasks (title + optional description)
-- List all tasks
-- Complete tasks (mark as done)
-- Delete tasks
-- Persist to JSON file
+- Display cards with Unicode suit symbols (♠ ♥ ♦ ♣)
+- Accept higher/lower guesses
+- Calculate score with time and streak bonuses
+- Handle ties (zero points, streak continues)
+- Show game over statistics
 
 **Time:** 60 minutes
 
@@ -742,7 +744,7 @@ Build from inside out
 
 ### Pattern 2: Feature-by-Feature
 ```
-Add Task (end-to-end) → List Tasks → Complete → Delete
+Card Display → Guess Logic → Scoring → Game Loop → Statistics
 ```
 Vertical slices of functionality
 
@@ -1098,8 +1100,8 @@ Consistency over perfection
 
 ### Pattern 1: Role + Context + Task + Constraints
 ```
-"You are a C# expert. In the TaskService class, add a method 
-GetTasksByStatusAsync that filters tasks by status. Follow the 
+"You are a C# expert. In the ScoringService class, add a method 
+GetHighScoresAsync that returns the top 10 scores. Follow the 
 async patterns in AGENTS.md and use IReadOnlyList return type 
 like other methods."
 ```
@@ -1115,31 +1117,31 @@ explain your reasoning before writing code:
 
 ### Pattern 3: Reference + Generate
 ```
-"Generate a TaskRepository class following the repository 
+"Generate a GameRepository class following the repository 
 pattern described in IMPLEMENTATION-PLAN.md. Use 
 System.Text.Json for serialization as specified in AGENTS.md."
 ```
 
 ### Pattern 4: Example + Replicate (Few-Shot)
 ```
-"Add a 'delete' command to Program.cs following the same 
-pattern as the 'complete' command. Parse task ID from args 
-and call TaskService.DeleteTaskAsync."
+"Add a 'replay' command to Program.cs following the same 
+pattern as the 'quit' command. Reset the deck and start a 
+new game by calling GameService.StartNewGameAsync."
 ```
 
 ### Pattern 5: Negative Constraints
 ```
-"Implement task filtering. DO NOT use LINQ. DO NOT load all 
-tasks into memory. Use streaming approach."
+"Implement card display. DO NOT use external libraries. DO NOT 
+require Unicode font support. Use ASCII art for card rendering."
 ```
 
 ### Pattern 6: Iterative Refinement
 ```
-First: "Draft a solution for task filtering"
+First: "Draft a solution for score calculation"
 Review output...
-Then: "Good, but add caching to improve performance"
+Then: "Good, but add streak bonus multiplier"
 Review...
-Finally: "Add logging for debugging"
+Finally: "Add high score persistence"
 ```
 
 ---
@@ -1177,7 +1179,7 @@ Use when pattern is non-obvious or has many variations
 
 ### Technique 3: Self-Critique
 ```
-"Implement task deletion. After you're done, critique your 
+"Implement game state management. After you're done, critique your 
 solution: What edge cases might you have missed? What could 
 be more robust?"
 ```
@@ -1193,26 +1195,21 @@ data access layer"
 
 ### Technique 5: Incremental Context
 ```
-Start: "Create a Task model"
-Add: "Now add validation to the Task model"
-Add: "Now create a service that uses this model"
+Start: "Create a Card model with Suit and Rank"
+Add: "Now add comparison methods to the Card model"
+Add: "Now create a Deck service that uses this model"
 ```
 Build up complexity gradually
 
 ---
 
 # Slide 38: When AI Struggles
-```
-"Add a 'delete' command to Program.cs following the same 
-pattern as the 'complete' command. Parse task ID from args 
-and call TaskService.DeleteTaskAsync."
-```
 
 ### Pattern 4: Problem + Constraints
 ```
-"Fix the null reference exception in GetTaskById when no 
-matching task is found. Return null instead of throwing, 
-and handle this in the CLI by displaying 'Task not found'."
+"Fix the null reference exception in GetCardByIndex when the 
+deck is empty. Return null instead of throwing, and handle 
+this in the CLI by displaying 'No cards remaining'."
 ```
 
 ---
@@ -1417,7 +1414,7 @@ dotnet test
 - `IMPLEMENTATION-PLAN-TEMPLATE.md` - Technical design guide
 
 ### Sample Projects:
-- `01-greenfield/` - Task Manager (concept)
+- `01-greenfield/` - HighLow Card Game (concept)
 - `02-brownfield/BookLibrary/` - Working C# CLI app
 - `02-brownfield/LegacyInventory/` - Upgrade exercise (.NET modernization)
 
@@ -1724,10 +1721,10 @@ AI is your power tool, you're still the craftsperson
 
 ### Technique 1: Chain of Thought
 ```
-"Let's implement TaskService step by step:
+"Let's implement GameService step by step:
 1. First, create the interface with method signatures
-2. Then, implement AddTaskAsync with validation
-3. Next, add GetAllTasksAsync with repository call
+2. Then, implement MakeGuessAsync with validation
+3. Next, add GetGameStateAsync with current card info
 4. Finally, add error handling for each method"
 ```
 

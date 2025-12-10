@@ -17,10 +17,10 @@ Use this template to define WHAT needs to be built and WHY, from a product persp
 **Success Criteria:** [How we'll measure if this feature succeeds]
 
 **Example:**
-> **What:** A command-line task manager that allows users to capture and track todos  
-> **Why:** Developers need a fast, keyboard-driven way to manage tasks without leaving the terminal  
-> **Who:** Software developers, DevOps engineers, power users  
-> **Success Criteria:** Users can add, view, and complete tasks in under 5 seconds
+> **What:** A command-line card guessing game where players predict higher or lower  
+> **Why:** Fun, quick game that demonstrates C# programming concepts  
+> **Who:** Developers learning C#, casual gamers, workshop participants  
+> **Success Criteria:** Players can complete a full game in under 3 minutes with clear scoring feedback
 
 ---
 
@@ -33,17 +33,17 @@ Describe the feature from the user's perspective:
 **So that** [benefit/value]
 
 **Example:**
-> **As a** busy developer  
-> **I want** to quickly capture tasks from the command line  
-> **So that** I don't lose context while coding and can stay organized
+> **As a** player  
+> **I want** to see the current card clearly displayed  
+> **So that** I can make an informed guess about the next card
 
-> **As a** task-oriented user  
-> **I want** to mark tasks as complete  
-> **So that** I can track my progress and maintain motivation
+> **As a** player  
+> **I want** to see my score update after each guess  
+> **So that** I can track my progress and stay motivated
 
-> **As a** forgetful person  
-> **I want** my tasks to persist between sessions  
-> **So that** I don't lose my todo list when I close the application
+> **As a** player  
+> **I want** to see my final statistics when the game ends  
+> **So that** I can measure my performance and try to improve
 
 ---
 
@@ -53,25 +53,30 @@ List concrete, testable requirements organized by capability:
 
 ### Core Capabilities
 
-#### Task Management
-- [ ] **REQ-001:** Users can add new tasks with a title (required) and description (optional)
-- [ ] **REQ-002:** Each task is assigned a unique identifier automatically
-- [ ] **REQ-003:** Tasks have a status: Pending or Complete
-- [ ] **REQ-004:** Tasks record creation timestamp
-- [ ] **REQ-005:** Users can mark tasks as complete by ID
-- [ ] **REQ-006:** Users can delete tasks by ID
-- [ ] **REQ-007:** Tasks persist to local storage (survive app restart)
+#### Game Setup
+- [ ] **REQ-001:** Game uses a standard 52-card deck (4 suits × 13 values)
+- [ ] **REQ-002:** Deck is shuffled randomly at the start of each game
+- [ ] **REQ-003:** First card is drawn and displayed to start the game
 
-#### Viewing & Filtering
-- [ ] **REQ-008:** Users can list all tasks
-- [ ] **REQ-009:** Users can filter tasks by status (Pending/Complete)
-- [ ] **REQ-010:** Task list displays: ID, title, status, creation date
-- [ ] **REQ-011:** Empty list displays helpful "No tasks found" message
+#### Gameplay
+- [ ] **REQ-004:** Player sees current card with value and suit symbol
+- [ ] **REQ-005:** Player can guess "higher" (h/H) or "lower" (l/L)
+- [ ] **REQ-006:** Player can quit anytime (q/Q)
+- [ ] **REQ-007:** Next card is revealed after each guess
+- [ ] **REQ-008:** Game indicates if guess was correct, incorrect, or tie
+- [ ] **REQ-009:** Game continues until deck is exhausted (51 guesses)
 
-#### Error Handling
-- [ ] **REQ-012:** Empty task title is rejected with clear error message
-- [ ] **REQ-013:** Invalid task ID returns "Task not found" error
-- [ ] **REQ-014:** All errors include actionable guidance for the user
+#### Scoring
+- [ ] **REQ-010:** Correct guess awards base points (10)
+- [ ] **REQ-011:** Speed bonus awards up to 5 additional points
+- [ ] **REQ-012:** Streak multiplier increases score for consecutive correct guesses
+- [ ] **REQ-013:** Ties award zero points but don't break streak
+- [ ] **REQ-014:** Running score displayed during gameplay
+
+#### End Game
+- [ ] **REQ-015:** Game over screen shows when deck is exhausted
+- [ ] **REQ-016:** Final statistics displayed (accuracy, longest streak, average time)
+- [ ] **REQ-017:** Player can choose to play again or exit
 
 ---
 
@@ -79,261 +84,262 @@ List concrete, testable requirements organized by capability:
 
 Use **Given-When-Then** format for testable scenarios:
 
-### AC1: Add Valid Task
-- **Given** the application is running
-- **When** I execute `taskmanager add "Buy milk"`
-- **Then** a new task is created with status "Pending"
-- **And** I see confirmation with the task ID
-- **And** the task is saved to persistent storage
+### AC1: Card Display
+- **Given** the game is running
+- **When** a card is displayed
+- **Then** I see the value (A, 2-10, J, Q, K) and suit symbol (♠ ♥ ♦ ♣)
+- **And** the card is rendered in an ASCII art box
 
-### AC2: Reject Empty Task Title
-- **Given** the application is running
-- **When** I execute `taskmanager add ""`
-- **Then** I see error: "Task title cannot be empty"
-- **And** no task is created
-- **And** the application exits with error code 1
+### AC2: Valid Higher Guess
+- **Given** the current card is 7♠
+- **When** I press 'h' for higher
+- **And** the next card is J♥ (value 11)
+- **Then** I see "Correct!" with the revealed card
+- **And** my score increases by base + speed bonus × streak multiplier
+- **And** my streak increases by 1
 
-### AC3: List Tasks Shows All Information
-- **Given** 3 tasks exist in the system
-- **When** I execute `taskmanager list`
-- **Then** I see all 3 tasks in a table format
-- **And** each task shows ID, title, status, and creation date
-- **And** the table has clear column headers
+### AC3: Valid Lower Guess
+- **Given** the current card is Q♦ (value 12)
+- **When** I press 'l' for lower
+- **And** the next card is 5♣ (value 5)
+- **Then** I see "Correct!" with the revealed card
+- **And** my score increases appropriately
 
-### AC4: Filter by Status
-- **Given** 2 pending tasks and 1 complete task exist
-- **When** I execute `taskmanager list --status pending`
-- **Then** I see only the 2 pending tasks
-- **And** the complete task is not displayed
+### AC4: Incorrect Guess
+- **Given** the current card is 7♠
+- **When** I press 'h' for higher
+- **And** the next card is 3♦ (value 3)
+- **Then** I see "Wrong!" with the revealed card
+- **And** my score does not increase
+- **And** my streak resets to 0
 
-### AC5: Complete Task by ID
-- **Given** a pending task exists with ID "abc123"
-- **When** I execute `taskmanager complete abc123`
-- **Then** the task status changes to "Complete"
-- **And** I see confirmation: "Task completed: [task title]"
-- **And** the change is persisted to storage
+### AC5: Tie Handling
+- **Given** the current card is 7♠
+- **When** the next card is 7♦ (same value)
+- **Then** I see "Tie! Same value."
+- **And** I receive 0 points
+- **And** my streak is NOT reset
 
-### AC6: Handle Non-Existent Task
-- **Given** no task exists with ID "invalid"
-- **When** I execute `taskmanager complete invalid`
-- **Then** I see error: "Task not found: invalid"
-- **And** the application exits with error code 1
+### AC6: Game End
+- **Given** I've made 51 guesses (deck exhausted)
+- **When** the last card is revealed
+- **Then** I see the Game Over screen
+- **And** my final statistics are displayed
 
-### AC7: Tasks Persist Between Sessions
-- **Given** I added 2 tasks in a previous session
-- **When** I close and reopen the application
-- **And** execute `taskmanager list`
-- **Then** I see both tasks from the previous session
+### AC7: Quit Mid-Game
+- **Given** I'm in the middle of a game
+- **When** I press 'q' to quit
+- **Then** I see my current statistics
+- **And** the game ends
 
 ---
 
 ## Detailed Functional Behavior
 
-### Add Task Command
+### Card Values
 
-**Command Syntax:**
-```bash
-taskmanager add "<title>" [--description "<text>"]
-```
+| Card | Value |
+|------|-------|
+| Ace (A) | 1 |
+| 2-10 | Face value |
+| Jack (J) | 11 |
+| Queen (Q) | 12 |
+| King (K) | 13 |
 
-**Parameters:**
-| Parameter | Type | Required | Max Length | Description |
-|-----------|------|----------|------------|-------------|
-| title | string | Yes | 200 chars | The task title |
-| description | string | No | 1000 chars | Optional task details |
+**Note:** Aces are always low (value 1). There is no "ace high" option.
 
-**Business Rules:**
-1. Title must not be empty or whitespace-only
-2. Leading/trailing whitespace is trimmed automatically
-3. Each task receives a unique GUID identifier
-4. Tasks default to "Pending" status
-5. Creation timestamp recorded in UTC
-6. Description is optional and can be omitted
+### Suit Symbols
 
-**Success Output:**
-```
-Task added successfully!
-ID: a3f2d4e1-b5c7-4a9f-8d6e-2f1a3c4b5d6e
-Title: Buy milk
-Status: Pending
-```
-
-**Error Cases:**
-| Condition | Error Message | Exit Code |
-|-----------|---------------|-----------|
-| Empty title | "Error: Task title cannot be empty" | 1 |
-| Title too long | "Error: Task title cannot exceed 200 characters" | 1 |
-| Storage write fails | "Error: Failed to save task. Check file permissions." | 2 |
+| Suit | Symbol |
+|------|--------|
+| Spades | ♠ |
+| Hearts | ♥ |
+| Diamonds | ♦ |
+| Clubs | ♣ |
 
 ---
 
-### List Tasks Command
+### Scoring Formula
 
-**Command Syntax:**
-```bash
-taskmanager list [--status <pending|complete>]
+```
+base_points = 10 (for correct guess)
+speed_bonus = max(0, 5 - floor(elapsed_seconds - 3))
+streak_multiplier = 1.0 + (current_streak × 0.5)
+
+total_points = floor((base_points + speed_bonus) × streak_multiplier)
 ```
 
-**Parameters:**
-| Parameter | Type | Required | Values | Description |
-|-----------|------|----------|--------|-------------|
-| status | enum | No | pending, complete | Filter by task status |
+**Scoring Examples:**
 
-**Business Rules:**
-1. If no status filter provided, show all tasks
-2. Display tasks in reverse chronological order (newest first)
-3. Show first 8 characters of GUID for readability
-4. Format dates as YYYY-MM-DD
-
-**Success Output:**
-```
-Total tasks: 3
-
-ID       | Title          | Status   | Created
----------|----------------|----------|------------
-a3f2d4e1 | Buy milk       | Pending  | 2025-12-07
-b5c7a3f2 | Write report   | Complete | 2025-12-06
-c1d8e4f3 | Team meeting   | Pending  | 2025-12-05
-```
-
-**Empty List Output:**
-```
-No tasks found.
-```
+| Scenario | Elapsed Time | Streak | Calculation | Points |
+|----------|--------------|--------|-------------|--------|
+| Correct, fast | 2.0 sec | 0 | (10 + 5) × 1.0 | 15 |
+| Correct, slow | 5.0 sec | 0 | (10 + 0) × 1.0 | 10 |
+| Correct, fast, streak 3 | 2.0 sec | 3 | (10 + 5) × 2.5 | 37 |
+| Correct, slow, streak 5 | 6.0 sec | 5 | (10 + 0) × 3.5 | 35 |
+| Incorrect | any | any | 0 | 0 |
+| Tie | any | any | 0 (streak preserved) | 0 |
 
 ---
 
-### Complete Task Command
+### Display Formats
 
-**Command Syntax:**
-```bash
-taskmanager complete <task-id>
+#### Game Start Screen
+```
+╔════════════════════════════════════════╗
+║         HIGH/LOW CARD GAME             ║
+╠════════════════════════════════════════╣
+║  Guess if the next card is higher      ║
+║  or lower than the current card.       ║
+║                                        ║
+║  Scoring:                              ║
+║  • Correct guess: 10 points            ║
+║  • Speed bonus: up to 5 points         ║
+║  • Streak multiplier: +50% per streak  ║
+║  • Tie (same value): 0 points          ║
+╚════════════════════════════════════════╝
+
+Press ENTER to start...
 ```
 
-**Parameters:**
-| Parameter | Type | Required | Format | Description |
-|-----------|------|----------|--------|-------------|
-| task-id | string | Yes | Full GUID or first 8 chars | Task identifier |
-
-**Business Rules:**
-1. Accept full GUID or shortened (first 8 chars)
-2. Task must exist and be in Pending status
-3. Change persisted immediately
-4. Cannot "uncomplete" a task in v1.0
-
-**Success Output:**
+#### Gameplay Screen
 ```
-Task completed: Buy milk
-```
+Cards remaining: 45    Score: 125    Streak: 3 🔥
 
-**Error Cases:**
-| Condition | Error Message | Exit Code |
-|-----------|---------------|-----------|
-| Task not found | "Error: Task not found: {id}" | 1 |
-| Already complete | "Error: Task is already complete" | 1 |
-| Storage write fails | "Error: Failed to update task. Check file permissions." | 2 |
+  ┌─────────┐
+  │ 7       │
+  │         │
+  │    ♠    │
+  │         │
+  │       7 │
+  └─────────┘
 
----
-
-### Delete Task Command
-
-**Command Syntax:**
-```bash
-taskmanager delete <task-id>
+[H]igher or [L]ower? (Q to quit): _
 ```
 
-**Parameters:**
-| Parameter | Type | Required | Format | Description |
-|-----------|------|----------|--------|-------------|
-| task-id | string | Yes | Full GUID or first 8 chars | Task identifier |
-
-**Business Rules:**
-1. Permanently removes task from storage
-2. No confirmation prompt in v1.0 (consider for v2.0)
-3. Cannot undo deletion
-
-**Success Output:**
+#### Correct Guess
 ```
-Task deleted: Buy milk
+  ┌─────────┐      ┌─────────┐
+  │ 7       │  →   │ J       │
+  │         │      │         │
+  │    ♠    │      │    ♥    │
+  │       7 │      │       J │
+  └─────────┘      └─────────┘
+
+✓ Correct! Jack of Hearts (11) is HIGHER than 7 of Spades (7)
+  +10 base  +4 speed bonus  ×2.0 streak = 28 points!
+
+Press any key to continue...
 ```
 
-**Error Cases:**
-| Condition | Error Message | Exit Code |
-|-----------|---------------|-----------|
-| Task not found | "Error: Task not found: {id}" | 1 |
-| Storage write fails | "Error: Failed to delete task. Check file permissions." | 2 |
+#### Incorrect Guess
+```
+  ┌─────────┐      ┌─────────┐
+  │ 7       │  →   │ 3       │
+  │         │      │         │
+  │    ♠    │      │    ♦    │
+  │       7 │      │       3 │
+  └─────────┘      └─────────┘
+
+✗ Wrong! 3 of Diamonds (3) is LOWER than 7 of Spades (7)
+  Streak reset!
+
+Press any key to continue...
+```
+
+#### Tie
+```
+  ┌─────────┐      ┌─────────┐
+  │ 7       │  →   │ 7       │
+  │         │      │         │
+  │    ♠    │      │    ♦    │
+  │       7 │      │       7 │
+  └─────────┘      └─────────┘
+
+≈ Tie! Both cards are 7. No points, but streak continues!
+
+Press any key to continue...
+```
+
+#### Game Over Screen
+```
+╔════════════════════════════════════════╗
+║            GAME OVER!                  ║
+╠════════════════════════════════════════╣
+║  Final Score: 847                      ║
+║                                        ║
+║  Statistics:                           ║
+║  • Correct guesses: 38/51 (74.5%)      ║
+║  • Longest streak: 12                  ║
+║  • Average response: 2.3 seconds       ║
+║  • Ties: 3                             ║
+╚════════════════════════════════════════╝
+
+Play again? (Y/N): _
+```
 
 ---
 
 ## Usage Examples
 
-### Example 1: Happy Path - Daily Workflow
-```bash
-# Morning: Add tasks for the day
-$ taskmanager add "Review pull requests"
-Task added successfully!
-ID: a3f2d4e1
-Title: Review pull requests
-Status: Pending
+### Example 1: Happy Path - Complete Game
+```
+[Game starts, player presses ENTER]
 
-$ taskmanager add "Write unit tests" --description "For new feature branch"
-Task added successfully!
-ID: b5c7a3f2
-Title: Write unit tests
-Status: Pending
+Cards remaining: 51    Score: 0    Streak: 0
 
-# Check current task list
-$ taskmanager list
-Total tasks: 2
+  ┌─────────┐
+  │ 5       │
+  │    ♣    │
+  │       5 │
+  └─────────┘
 
-ID       | Title                | Status  | Created
----------|----------------------|---------|------------
-b5c7a3f2 | Write unit tests     | Pending | 2025-12-07
-a3f2d4e1 | Review pull requests | Pending | 2025-12-07
+[H]igher or [L]ower? (Q to quit): h
 
-# Complete first task
-$ taskmanager complete a3f2d4e1
-Task completed: Review pull requests
+✓ Correct! 9 of Diamonds is HIGHER than 5 of Clubs
+  +10 base  +5 speed bonus  ×1.0 streak = 15 points!
 
-# View only pending tasks
-$ taskmanager list --status pending
-Total tasks: 1
+[... 50 more guesses ...]
 
-ID       | Title            | Status  | Created
----------|------------------|---------|------------
-b5c7a3f2 | Write unit tests | Pending | 2025-12-07
+╔════════════════════════════════════════╗
+║            GAME OVER!                  ║
+╠════════════════════════════════════════╣
+║  Final Score: 523                      ║
+║  Correct guesses: 35/51 (68.6%)        ║
+╚════════════════════════════════════════╝
+
+Play again? (Y/N): n
+
+Thanks for playing!
 ```
 
-### Example 2: Error Handling
-```bash
-# Try to add task without title
-$ taskmanager add ""
-Error: Task title cannot be empty
+### Example 2: Early Quit
+```
+Cards remaining: 30    Score: 200    Streak: 5 🔥
 
-# Try to complete non-existent task
-$ taskmanager complete invalid-id
-Error: Task not found: invalid-id
+  ┌─────────┐
+  │ K       │
+  │    ♠    │
+  │       K │
+  └─────────┘
 
-# Try to complete using partial ID
-$ taskmanager complete a3f2
-Task completed: Review pull requests
+[H]igher or [L]ower? (Q to quit): q
+
+╔════════════════════════════════════════╗
+║           GAME ENDED EARLY             ║
+╠════════════════════════════════════════╣
+║  Final Score: 200                      ║
+║  Guesses made: 21/51                   ║
+╚════════════════════════════════════════╝
 ```
 
-### Example 3: Persistence Across Sessions
-```bash
-# Session 1: Add tasks
-$ taskmanager add "Task 1"
-$ taskmanager add "Task 2"
-$ exit
+### Example 3: Invalid Input
+```
+[H]igher or [L]ower? (Q to quit): x
 
-# Session 2: Tasks still exist
-$ taskmanager list
-Total tasks: 2
+Invalid input. Please press H, L, or Q.
 
-ID       | Title  | Status  | Created
----------|--------|---------|------------
-b5c7a3f2 | Task 2 | Pending | 2025-12-07
-a3f2d4e1 | Task 1 | Pending | 2025-12-07
+[H]igher or [L]ower? (Q to quit): _
 ```
 
 ---
@@ -341,102 +347,63 @@ a3f2d4e1 | Task 1 | Pending | 2025-12-07
 ## Edge Cases & Error Scenarios
 
 ### Input Validation
-1. **Whitespace-only title:**
-   - Behavior: Reject as empty (after trimming)
-   - Error: "Task title cannot be empty"
+1. **Invalid key pressed:**
+   - Behavior: Display error message, re-prompt
+   - Do NOT count as a guess
 
-2. **Title exceeding 200 characters:**
-   - Behavior: Reject with error
-   - Do NOT truncate automatically
+2. **Very fast response (< 0.1 seconds):**
+   - Behavior: Accept normally, award maximum speed bonus
+   - No penalty for being fast
 
-3. **Special characters in title:**
-   - Behavior: Accept all UTF-8 characters
-   - Properly escape for storage
+3. **Very slow response (> 30 seconds):**
+   - Behavior: Accept normally, no speed bonus
+   - No timeout enforcement
 
-4. **Description exceeding 1000 characters:**
-   - Behavior: Reject with error
-   - Error: "Description cannot exceed 1000 characters"
+### Game State
+4. **Last card in deck:**
+   - Behavior: After 51st guess, show game over immediately
+   - No "continue" prompt on last card
 
-### Storage & Persistence
-5. **Storage file doesn't exist on first run:**
-   - Behavior: Create file and directory automatically
-   - Default location: `~/.taskmanager/tasks.json`
+5. **All cards same value (theoretically impossible):**
+   - Behavior: Would be all ties, score 0
+   - Not a realistic scenario with shuffled deck
 
-6. **Storage file is corrupted (invalid JSON):**
-   - Behavior: Display error with backup instructions
-   - Error: "Storage file is corrupted. Please backup and delete ~/.taskmanager/tasks.json"
-   - Do NOT overwrite corrupted file
+6. **Player achieves perfect game (51/51 correct):**
+   - Behavior: Display special congratulations message
+   - "Perfect Game! You're a card shark! 🦈"
 
-7. **No write permissions to storage location:**
-   - Behavior: Fail gracefully on any write operation
-   - Error: "Permission denied. Check write access to ~/.taskmanager/"
+### Terminal Compatibility
+7. **Terminal doesn't support Unicode:**
+   - Behavior: Fall back to ASCII (S, H, D, C instead of ♠♥♦♣)
+   - Box characters: use +, -, | instead of box-drawing
 
-8. **Disk full when saving:**
-   - Behavior: Detect before writing, preserve existing data
-   - Error: "Insufficient disk space to save tasks"
-
-### Task Operations
-9. **Empty task list:**
-   - Behavior: Display "No tasks found." (not an error)
-   - Exit code: 0 (success)
-
-10. **Filtering returns no results:**
-    - Behavior: Display "No [status] tasks found."
-    - Exit code: 0 (success)
-
-11. **Duplicate task IDs (should never occur):**
-    - Behavior: Use GUID to prevent this
-    - If detected, treat as data corruption
-
-12. **Task ID matches multiple tasks (shortened ID):**
-    - Behavior: Accept only if unambiguous
-    - Error: "Ambiguous task ID. Please provide more characters."
-
-### Concurrency
-13. **Multiple instances running simultaneously:**
-    - Behavior: Not supported in v1.0
-    - Last write wins (potential data loss)
-    - Document this limitation
+8. **Terminal window too small:**
+   - Behavior: Display simplified format
+   - Minimum requirement: 40 columns
 
 ---
 
 ## Non-Functional Requirements
 
 ### Performance
-- **Response time:** All commands complete in < 100ms for up to 10,000 tasks
-- **Startup time:** < 50ms cold start
-- **Memory usage:** < 50MB for 1,000 tasks
-- **File I/O:** Async operations where possible
+- **Response time:** Game responds to input in < 50ms
+- **Startup time:** < 100ms to display first card
+- **Memory usage:** < 10MB (52 cards in memory)
 
 ### Reliability
-- **Data persistence:** All changes persisted immediately (no caching delay)
-- **Data integrity:** Atomic file writes to prevent corruption
-- **Error handling:** Never corrupt existing data, even on crash
-- **Validation:** All inputs validated before processing
+- **No crashes:** Invalid input should never crash the game
+- **State consistency:** Score and streak always accurate
+- **Clean exit:** Ctrl+C shows final score before exiting
 
 ### Usability
-- **Output clarity:** Human-readable, well-formatted output
-- **Error messages:** Specific and actionable (tell user what to do)
-- **Help text:** Available via `--help` on all commands
-- **Discoverability:** Running `taskmanager` with no args shows help
+- **Clear feedback:** Every action has visible feedback
+- **Simple controls:** Only 3 keys needed (H, L, Q)
+- **Readable display:** Cards clearly visible with contrast
 
 ### Compatibility
 - **Operating Systems:** Windows 10+, macOS 12+, Ubuntu 20.04+
 - **.NET Runtime:** .NET 8.0 or later
-- **File format:** UTF-8 JSON for cross-platform compatibility
-- **Path handling:** Cross-platform (use Path.Combine, environment vars)
-
-### Maintainability
-- **Code coverage:** Minimum 80% test coverage
-- **Documentation:** XML comments on all public APIs
-- **Code organization:** Follow project AGENTS.md conventions
-- **Logging:** Log errors with context for troubleshooting
-
-### Security
-- **Authentication:** Not required (single-user local tool)
-- **Authorization:** Rely on OS file system permissions
-- **Data location:** User's home directory only
-- **Input sanitization:** Prevent injection in JSON/file paths
+- **Terminal:** Any Unicode-supporting terminal
 
 ---
 
@@ -445,31 +412,13 @@ a3f2d4e1 | Task 1 | Pending | 2025-12-07
 ### Must Have
 - Must work on Windows, macOS, and Linux
 - Must be compatible with .NET 8.0 or later
-- Must use cross-platform file paths
-- Must NOT require admin/root privileges
-- Must handle UTF-8 text correctly
+- Must handle Unicode suit symbols correctly
+- Must NOT require administrator/root privileges
 
 ### Must NOT
 - Must NOT require internet connectivity
-- Must NOT access files outside user's home directory
-- Must NOT spawn background processes
+- Must NOT persist game state between sessions (fresh game each time)
 - Must NOT require additional runtime dependencies beyond .NET
-
----
-
-## Dependencies
-
-### External Libraries
-- **System.CommandLine** (>= 2.0.0) - CLI argument parsing
-- **System.Text.Json** (built-in) - JSON serialization
-
-### File System
-- **Write access:** `~/.taskmanager/` directory
-- **Storage format:** JSON file at `~/.taskmanager/tasks.json`
-
-### Prerequisites
-- .NET 8.0 Runtime or SDK installed
-- Sufficient disk space (< 1MB for typical usage)
 
 ---
 
@@ -477,54 +426,30 @@ a3f2d4e1 | Task 1 | Pending | 2025-12-07
 
 Explicitly NOT included in this version:
 
-❌ **Task priorities** (Low/Medium/High) - Consider for v2.0  
-❌ **Due dates and reminders** - Consider for v2.0  
-❌ **Task categories or tags** - Consider for v2.0  
-❌ **Search by keyword** - Consider for v2.0  
-❌ **Task editing** (change title/description) - Consider for v2.0  
-❌ **Undo/redo operations** - Consider for v2.0  
-❌ **Multi-user support** - Not planned  
-❌ **Cloud sync** - Not planned  
-❌ **Recurring tasks** - Not planned  
-❌ **Task dependencies** - Not planned  
-❌ **Export to other formats** (CSV, PDF) - Not planned  
+❌ **High score persistence** - Consider for v2.0  
+❌ **Multiple difficulty levels** - Consider for v2.0  
+❌ **Joker cards** - Not planned  
+❌ **Multi-player mode** - Not planned  
+❌ **Card counting hints** - Consider for v2.0  
+❌ **Betting/gambling mechanics** - Not appropriate  
+❌ **Network play** - Not planned  
+❌ **Graphical interface** - CLI only for this version  
 
-**Rationale:** Focus on core task management (add, view, complete, delete) before adding complexity.
+**Rationale:** Focus on core gameplay loop before adding complexity.
 
 ---
 
 ## Success Metrics
 
 ### User Experience Metrics
-- Users can add a task in < 5 seconds (including typing)
-- 95% of commands succeed without errors
-- Error messages lead to resolution (no user stuck)
+- Players can start a new game in < 5 seconds
+- 95% of games complete without errors
+- Average game duration: 2-3 minutes
 
 ### Technical Metrics
 - 100% of critical requirements implemented
 - 80%+ test coverage
-- < 100ms command execution time
-- Zero data corruption incidents in testing
-
-### Adoption Metrics (if applicable)
-- 80% of team members use within first week
-- Average 5+ tasks per user per day
-- < 1 support request per 100 users
-
----
-
-## Open Questions & Decisions Needed
-
-| # | Question | Options | Decision | Decided By | Date |
-|---|----------|---------|----------|------------|------|
-| 1 | Task ID display format | A) Full GUID B) First 8 chars C) User configurable | First 8 chars (B) | Tech Lead | 2025-12-07 |
-| 2 | Handling corrupted storage file | A) Auto-recreate B) Manual intervention C) Backup & reset | Manual intervention (B) | Product Owner | 2025-12-07 |
-| 3 | Concurrency support in v1.0 | A) Yes (file locking) B) No (document limitation) | No (B) | Tech Lead | 2025-12-07 |
-| 4 | Delete confirmation prompt | A) Always prompt B) No prompt C) --force flag | No prompt (B) | Product Owner | TBD |
-
-**Notes:**
-- Question 4 affects user experience (convenience vs. safety)
-- Consider adding --force flag in future if users request it
+- < 50ms response time per guess
 
 ---
 
@@ -533,45 +458,20 @@ Explicitly NOT included in this version:
 - **Implementation Plan:** `IMPLEMENTATION-PLAN.md` (technical design and approach)
 - **AGENTS.md:** Project coding conventions and standards
 - **README.md:** User-facing documentation and getting started guide
-- **Testing Plan:** `TESTING-PLAN.md` (if separate from implementation plan)
-
----
-
-## Approval & Sign-off
-
-| Role | Name | Date | Status |
-|------|------|------|--------|
-| Product Owner | [Name] | YYYY-MM-DD | ☐ Approved / ☐ Needs Changes |
-| Tech Lead | [Name] | YYYY-MM-DD | ☐ Approved / ☐ Needs Changes |
-| Stakeholder | [Name] | YYYY-MM-DD | ☐ Approved / ☐ Needs Changes |
-
-**Approval Notes:**
-[Any conditions, concerns, or follow-up items]
-
----
-
-## Revision History
-
-| Version | Date | Author | Changes | Reviewed By |
-|---------|------|--------|---------|-------------|
-| 0.1 | 2025-12-05 | [Name] | Initial draft | - |
-| 0.2 | 2025-12-06 | [Name] | Added edge cases based on team review | [Name] |
-| 0.3 | 2025-12-07 | [Name] | Clarified error handling requirements | [Name] |
-| 1.0 | 2025-12-08 | [Name] | Final approval for implementation | [Name] |
 
 ---
 
 ## Guidelines for Using This Template
 
-1. **Be specific:** Vague requirements ("fast", "good UX") lead to incorrect implementations
+1. **Be specific:** Vague requirements ("fun game") lead to incorrect implementations
 2. **Include examples:** Show concrete inputs and outputs
 3. **Cover edge cases:** Think about what can go wrong
 4. **Make it testable:** Every requirement should be verifiable
 5. **Separate WHAT from HOW:** This doc defines product needs, not technical design
 
 **This is a PRODUCT document:**
-- Describes user needs and business requirements
-- Defines expected behavior and acceptance criteria
+- Describes user needs and expected behavior
+- Defines acceptance criteria
 - Does NOT prescribe technical implementation details
 
 **Technical implementation details belong in the IMPLEMENTATION-PLAN.md document.**

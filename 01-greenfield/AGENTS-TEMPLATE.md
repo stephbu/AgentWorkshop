@@ -71,7 +71,7 @@ Use this template to create an `AGENTS.md` file for a new C# project.
 ## Naming Conventions
 
 - **Classes, Interfaces, Methods, Properties:** PascalCase
-  - Interfaces: prefix with `I` (e.g., `ITaskRepository`)
+  - Interfaces: prefix with `I` (e.g., `IGameService`)
   - Async methods: suffix with `Async` (e.g., `SaveAsync`)
 
 - **Parameters, Local Variables:** camelCase
@@ -88,8 +88,8 @@ Use this template to create an `AGENTS.md` file for a new C# project.
 namespace ProjectName.FolderName;
 
 // Example:
-namespace MyTaskManager.Services;
-namespace MyTaskManager.Models;
+namespace HighLow.Services;
+namespace HighLow.Models;
 ```
 
 ---
@@ -105,17 +105,16 @@ Required on:
 **Example:**
 ```csharp
 /// <summary>
-/// Manages task creation, retrieval, and persistence.
+/// Manages the game loop and player interactions.
 /// </summary>
-public class TaskService
+public class GameService
 {
     /// <summary>
-    /// Adds a new task to the system.
+    /// Starts a new game with a shuffled deck.
     /// </summary>
-    /// <param name="title">The task title.</param>
-    /// <param name="description">Optional task description.</param>
-    /// <returns>The created task with generated ID.</returns>
-    public async Task<TaskItem> AddTaskAsync(string title, string? description = null)
+    /// <param name="seed">Optional seed for reproducible shuffling.</param>
+    /// <returns>The initial game state.</returns>
+    public GameState StartNewGame(int? seed = null)
     {
         // ...
     }
@@ -128,7 +127,7 @@ public class TaskService
 
 ### Exceptions
 - Use for truly exceptional situations (file not found, network error, etc.)
-- Create custom exceptions when appropriate: `TaskNotFoundException`
+- Create custom exceptions when appropriate: `InvalidGuessException`
 - Never swallow exceptions silently
 
 ### Result Pattern (Optional)
@@ -161,34 +160,38 @@ public class Result<T>
 [Method]_[Scenario]_[ExpectedResult]
 
 // Examples:
-public void AddTask_WithValidData_ReturnsNewTask()
-public void CompleteTask_WithInvalidId_ThrowsTaskNotFoundException()
-public async Task SaveTasks_WithEmptyList_CreatesEmptyJsonFile()
+public void CompareCards_HigherCard_ReturnsPositive()
+public void CalculateScore_WithStreak_AppliesMultiplier()
+public void ShuffleDeck_WithSeed_ProducesDeterministicOrder()
 ```
 
 ### Test Structure (AAA Pattern)
 ```csharp
 [Fact]
-public async Task AddTask_WithValidData_ReturnsNewTask()
+public void CalculateScore_WithStreak_AppliesMultiplier()
 {
     // Arrange
-    var service = new TaskService();
-    var title = "Test task";
+    var scoringService = new ScoringService();
+    var streak = 3;
+    var elapsedSeconds = 2.0;
 
     // Act
-    var result = await service.AddTaskAsync(title);
+    var result = scoringService.CalculateScore(
+        isCorrect: true, 
+        elapsedSeconds: elapsedSeconds, 
+        currentStreak: streak);
 
     // Assert
-    Assert.NotNull(result);
-    Assert.Equal(title, result.Title);
-    Assert.NotEqual(Guid.Empty, result.Id);
+    Assert.True(result > 10); // Base is 10, should be higher with streak
+    Assert.Equal(38, result); // (10 + 5) * 2.5 = 37.5 → 38
 }
 ```
 
 ### Mocking
-- Mock external dependencies (file I/O, databases, APIs)
+- Mock external dependencies (file I/O, random number generation)
 - Use a mocking framework (e.g., Moq, NSubstitute) if needed
 - Don't mock the class under test
+- Use seeded Random for deterministic shuffle tests
 
 ---
 
@@ -198,188 +201,155 @@ When working in this codebase:
 
 1. **Always read AGENTS.md first** to understand conventions
 
-2. **Follow existing patterns**
-   - Look at similar classes before creating new ones
-   - Match the style of surrounding code
+2. **Follow the established patterns** in existing code
 
-3. **Create tests alongside implementation**
-   - Write test class when creating production class
-   - Cover happy path and error cases
+3. **Create tests alongside implementation** - never add features without tests
 
-4. **Use dependency injection**
-   - Constructor injection for dependencies
-   - Register in `Program.cs` or DI container
+4. **Use dependency injection** for services to enable testing
 
-5. **Async all the way**
-   - Use `async`/`await` for I/O operations
-   - Suffix async methods with `Async`
-   - Return `Task` or `Task<T>`
+5. **Keep entry points thin** - business logic belongs in services
 
-6. **Never hardcode**
-   - File paths → configuration or environment variables
-   - Magic numbers → named constants
-   - Connection strings → configuration
+6. **Handle edge cases explicitly** - document any assumptions
 
-7. **Handle errors appropriately**
-   - Validate input early
-   - Throw meaningful exceptions
-   - Log failures with context
+7. **Use meaningful variable names** - code should be self-documenting
 
-8. **XML comments on public APIs**
-   - Brief `<summary>` required
-   - Document parameters and return values
-   - Include examples if behavior is complex
+8. **Validate inputs at boundaries** - services should validate their inputs
 
 ---
 
-## Example Code Style
+## Example: HighLow Card Game
 
-### Models
+Below is an example AGENTS.md for a HighLow card guessing game:
+
+```markdown
+# AGENTS.md
+
+## Project Overview
+A command-line high/low card guessing game. Players see a card and guess 
+whether the next card will be higher or lower in value. Score based on 
+accuracy, speed, and streak multipliers.
+
+## Tech Stack
+- Language: C# 12
+- Framework: .NET 8.0
+- Testing: xUnit
+- No external dependencies required
+
+## Project Structure
+/HighLow
+  /src
+    /HighLow
+      /Models        - Card, Deck, Suit, GameState, GameStatistics
+      /Services      - GameService, ScoringService, DeckService
+      /Display       - ConsoleRenderer for ASCII card art
+      Program.cs
+  /tests
+    /HighLow.Tests
+      /Models        - CardTests, DeckTests
+      /Services      - ScoringServiceTests, GameServiceTests
+
+## Game-Specific Conventions
+
+### Card Representation
+- Use Unicode suit symbols: ♠ ♥ ♦ ♣
+- Card values: A=1, 2-10, J=11, Q=12, K=13
+- Aces are always low (value 1)
+- Use records for immutable card representation
+
+### Scoring Rules
+- Base points per correct guess: 10
+- Speed bonus: max 5 points (decreases 1 point per second after 3 seconds)
+- Streak multiplier: 1.0 + (streak_count × 0.5)
+- Ties (same value): 0 points, streak continues
+
+### Display Conventions
+- Cards displayed in ASCII art boxes with box-drawing characters
+- Use ✓ for correct, ✗ for incorrect
+- Show running score, cards remaining, and current streak
+- Fire emoji (🔥) for streaks of 3+
+
+## Example Code
+
+### Card Model
 ```csharp
-namespace MyTaskManager.Models;
+namespace HighLow.Models;
 
-/// <summary>
-/// Represents the status of a task.
-/// </summary>
-public enum TaskStatus
+public enum Suit { Spades, Hearts, Diamonds, Clubs }
+
+public record Card(Suit Suit, int Value)
 {
-    Pending,
-    Complete
-}
-
-/// <summary>
-/// Represents a task item in the system.
-/// </summary>
-public class TaskItem
-{
-    /// <summary>
-    /// Gets the unique identifier for the task.
-    /// </summary>
-    public Guid Id { get; init; }
-
-    /// <summary>
-    /// Gets the task title.
-    /// </summary>
-    public required string Title { get; init; }
-
-    /// <summary>
-    /// Gets the optional task description.
-    /// </summary>
-    public string? Description { get; init; }
-
-    /// <summary>
-    /// Gets or sets the task status.
-    /// </summary>
-    public TaskStatus Status { get; set; } = TaskStatus.Pending;
-
-    /// <summary>
-    /// Gets the creation timestamp.
-    /// </summary>
-    public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+    public string Display => $"{ValueSymbol}{SuitSymbol}";
+    
+    public string ValueSymbol => Value switch
+    {
+        1 => "A", 11 => "J", 12 => "Q", 13 => "K",
+        _ => Value.ToString()
+    };
+    
+    public char SuitSymbol => Suit switch
+    {
+        Suit.Spades => '♠',
+        Suit.Hearts => '♥',
+        Suit.Diamonds => '♦',
+        Suit.Clubs => '♣',
+        _ => '?'
+    };
 }
 ```
 
-### Services
+### Scoring Service
 ```csharp
-namespace MyTaskManager.Services;
+namespace HighLow.Services;
 
-/// <summary>
-/// Service for managing tasks.
-/// </summary>
-public class TaskService(ITaskRepository repository)
+public class ScoringService
 {
-    private readonly ITaskRepository _repository = repository;
-
-    /// <summary>
-    /// Adds a new task.
-    /// </summary>
-    public async Task<TaskItem> AddTaskAsync(string title, string? description = null)
+    private const int BasePoints = 10;
+    private const int MaxSpeedBonus = 5;
+    private const double StreakMultiplierIncrement = 0.5;
+    
+    public int CalculateScore(bool isCorrect, double elapsedSeconds, int currentStreak)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(title);
-
-        var task = new TaskItem
-        {
-            Id = Guid.NewGuid(),
-            Title = title,
-            Description = description
-        };
-
-        await _repository.SaveTaskAsync(task);
-        return task;
+        if (!isCorrect) return 0;
+        
+        var speedBonus = Math.Max(0, MaxSpeedBonus - (int)(elapsedSeconds - 3));
+        var multiplier = 1.0 + (currentStreak * StreakMultiplierIncrement);
+        
+        return (int)Math.Round((BasePoints + speedBonus) * multiplier);
     }
 }
 ```
 
----
+## Testing Guidelines
 
-## Work Unit Guidelines
-
-**Human-Reviewable Work Size:**
-- **Maximum:** 1 feature or ~300 lines of changed code per PR
-- **Rationale:** Beyond this, quality of review drops significantly
-- **For AI-generated code:** Even more important—easier to verify correctness
-
-**Breaking Down Work:**
-- Split large features into logical phases
-- Each phase should be independently testable
-- Each phase should be deployable (even if feature-flagged)
-- Prioritize phases: Core → Nice-to-have → Polish
-
-**Examples:**
-```markdown
-❌ Too Large:
-"Complete task management system" (1000+ lines, many files)
-
-✅ Right Size:
-Phase 1: "Add and list tasks" (~200 lines, 3-4 files)
-Phase 2: "Complete and delete tasks" (~150 lines, 2-3 files)
-Phase 3: "Search and filter" (~200 lines, 3-4 files)
+### Deterministic Tests
+Use seeded Random for shuffle tests:
+```csharp
+[Fact]
+public void Shuffle_WithSameSeed_ProducesSameOrder()
+{
+    var deck1 = new DeckService(seed: 42);
+    var deck2 = new DeckService(seed: 42);
+    
+    var cards1 = deck1.GetShuffledDeck();
+    var cards2 = deck2.GetShuffledDeck();
+    
+    Assert.Equal(cards1, cards2);
+}
 ```
 
-**Benefits:**
-- Faster, higher-quality code reviews
-- Easier to track progress
-- Simpler to roll back if issues arise
-- Agents can focus on one coherent unit
-- Team can prioritize and parallelize work
-
----
-
-## Common Pitfalls to Avoid
-
-❌ **Don't:**
-- Mix business logic into command handlers
-- Use `Console.WriteLine` in services (use logging or return values)
-- Hardcode file paths or configuration values
-- Catch exceptions without handling or rethrowing
-- Forget to await async methods
-
-✅ **Do:**
-- Keep commands thin—delegate to services
-- Return values from services; command handlers format output
-- Use configuration for environment-specific values
-- Let exceptions bubble up or handle them meaningfully
-- Await all async operations
-
----
-
-## Evolution & Maintenance
-
-This `AGENTS.md` should evolve as the project grows:
-
-- **Add patterns** as they emerge
-- **Document gotchas** when discovered
-- **Update examples** to reflect current codebase
-- **Refine conventions** based on what works
-
-Treat this as living documentation—not set in stone!
-
----
-
-## Questions?
-
-If this document is unclear or doesn't cover a scenario, ask the agent:
-
-*"How should I handle [scenario] given the conventions in AGENTS.md?"*
-
-The agent can infer from patterns and make reasonable suggestions.
+### Scoring Test Examples
+```csharp
+[Theory]
+[InlineData(true, 2.0, 0, 15)]   // Fast, no streak: 10 + 5 = 15
+[InlineData(true, 5.0, 0, 10)]   // Slow, no streak: 10 + 0 = 10
+[InlineData(true, 2.0, 3, 38)]   // Fast, streak 3: (10+5) * 2.5 = 37.5 → 38
+[InlineData(false, 1.0, 5, 0)]   // Wrong guess: always 0
+public void CalculateScore_VariousScenarios_ReturnsExpected(
+    bool isCorrect, double seconds, int streak, int expected)
+{
+    var service = new ScoringService();
+    var result = service.CalculateScore(isCorrect, seconds, streak);
+    Assert.Equal(expected, result);
+}
+```
+```

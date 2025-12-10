@@ -68,7 +68,7 @@ By the end of this workshop, participants will be able to:
 
 #### Part 2: Hands-On Lab - Build from Scratch (60 min)
 
-**Lab Exercise: Task Manager CLI Application**
+**Lab Exercise: HighLow Card Game CLI Application**
 
 Participants will build a complete C# CLI application using agents:
 
@@ -104,7 +104,7 @@ Participants will build a complete C# CLI application using agents:
 - Q&A
 
 #### Deliverables:
-- Working Task Manager CLI application
+- Working HighLow Card Game CLI application
 - Complete AGENTS.md
 - Product Requirements document
 - Implementation Plan document
@@ -207,7 +207,7 @@ Participants will extend an existing C# CLI application:
 - BEST-PRACTICES.md - Comprehensive guide (includes MCP section)
 - CHEATSHEET.md - Quick reference (includes MCP commands)
 - Templates for AGENTS.md, Product Requirements, Implementation Plans
-- Sample projects (TaskManager, BookLibrary)
+- Sample projects (HighLow, BookLibrary)
 - MCP server setup instructions (optional)
 
 ---

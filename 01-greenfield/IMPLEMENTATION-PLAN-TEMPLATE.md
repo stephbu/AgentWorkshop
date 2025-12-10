@@ -28,8 +28,8 @@ Use this template to define HOW the feature will be technically implemented.
 - [Library/package 3]
 
 **Example:**
-> **Approach:** Implement as a .NET console application using System.CommandLine for argument parsing and System.Text.Json for data persistence.  
-> **Key Technologies:** .NET 8.0, System.CommandLine 2.0, System.Text.Json
+> **Approach:** Implement as a .NET console application with a clean separation between game logic, scoring, and display. Use records for immutable card representation and dependency injection for testability.  
+> **Key Technologies:** .NET 8.0, C# 12, xUnit for testing
 
 ---
 
@@ -39,57 +39,59 @@ Use this template to define HOW the feature will be technically implemented.
 
 ```mermaid
 flowchart TD
-    A["Program.cs<br/>(CLI Interface)"] -->|Entry point, command routing| B["TaskService<br/>(Business Logic)"]
-    A --> C["TaskRepository<br/>(Data Access)"]
-    B --> C
-    C --> D["tasks.json<br/>(Storage)"]
+    A["Program.cs<br/>(Entry Point)"] --> B["GameService<br/>(Game Loop)"]
+    B --> C["DeckService<br/>(Card Management)"]
+    B --> D["ScoringService<br/>(Score Calculation)"]
+    B --> E["ConsoleRenderer<br/>(Display)"]
+    C --> F["Card Models<br/>(Data)"]
 ```
 
 **Layers:**
-1. **Presentation (CLI):** Command parsing and output formatting
-2. **Business Logic:** Task operations and validation
-3. **Data Access:** Persistence and retrieval
-4. **Storage:** JSON file in user's home directory
+1. **Entry Point (Program.cs):** Initialize services, start game loop
+2. **Game Logic (GameService):** Manage game state, process guesses
+3. **Deck Management (DeckService):** Shuffle, draw cards
+4. **Scoring (ScoringService):** Calculate points with time/streak
+5. **Display (ConsoleRenderer):** Render cards and UI
 
 ---
 
 ## Project Structure
 
 ```
-/MyTaskManager
+/HighLow
   /src
-    /MyTaskManager
-      /Models              - Domain entities
-        Task.cs            - Task model with properties
-        TaskStatus.cs      - Enum for task status
-      /Services            - Business logic
-        TaskService.cs     - Core task operations
-        ITaskService.cs    - Service interface
-      /Storage             - Data persistence
-        TaskRepository.cs  - JSON file operations
-        ITaskRepository.cs - Repository interface
-      /Commands            - CLI command handlers
-        AddCommand.cs      - Handler for 'add' command
-        ListCommand.cs     - Handler for 'list' command
-        CompleteCommand.cs - Handler for 'complete' command
-        DeleteCommand.cs   - Handler for 'delete' command
-      /Utilities           - Helper classes
-        PathHelper.cs      - Cross-platform path resolution
-      Program.cs           - Application entry point
-      MyTaskManager.csproj - Project file
+    /HighLow
+      /Models                  - Domain entities
+        Card.cs                - Card record with suit and value
+        Suit.cs                - Enum for card suits
+        GameState.cs           - Current game state
+        GameStatistics.cs      - End-of-game statistics
+        GuessResult.cs         - Result of a guess
+      /Services                - Business logic
+        GameService.cs         - Main game loop
+        IGameService.cs        - Game service interface
+        DeckService.cs         - Deck shuffling and drawing
+        IDeckService.cs        - Deck service interface
+        ScoringService.cs      - Score calculation
+        IScoringService.cs     - Scoring service interface
+      /Display                 - UI rendering
+        ConsoleRenderer.cs     - ASCII card display
+        IRenderer.cs           - Renderer interface
+      Program.cs               - Application entry point
+      HighLow.csproj           - Project file
   /tests
-    /MyTaskManager.Tests
+    /HighLow.Tests
       /Models
-        TaskTests.cs
+        CardTests.cs           - Test card comparison
       /Services
-        TaskServiceTests.cs
-      /Storage
-        TaskRepositoryTests.cs
-      MyTaskManager.Tests.csproj
-  AGENTS.md                - Project conventions
-  PRODUCT-REQUIREMENTS.md  - Product requirements
-  IMPLEMENTATION-PLAN.md   - This document
-  README.md                - User documentation
+        DeckServiceTests.cs    - Test shuffle determinism
+        ScoringServiceTests.cs - Test scoring formula
+        GameServiceTests.cs    - Test game flow
+      HighLow.Tests.csproj
+  AGENTS.md                    - Project conventions
+  PRODUCT-REQUIREMENTS.md      - Product requirements
+  IMPLEMENTATION-PLAN.md       - This document
+  README.md                    - User documentation
 ```
 
 ---
@@ -98,489 +100,381 @@ flowchart TD
 
 ### 1. Models (Domain Entities)
 
-#### Task.cs
+#### Suit.cs
 ```csharp
-namespace MyTaskManager.Models;
+namespace HighLow.Models;
 
 /// <summary>
-/// Represents a task in the system.
+/// Represents the four suits in a standard deck.
 /// </summary>
-public class Task
+public enum Suit
 {
-    /// <summary>
-    /// Gets the unique identifier for the task.
-    /// </summary>
-    public Guid Id { get; init; } = Guid.NewGuid();
-
-    /// <summary>
-    /// Gets the task title.
-    /// </summary>
-    public required string Title { get; init; }
-
-    /// <summary>
-    /// Gets the optional task description.
-    /// </summary>
-    public string? Description { get; init; }
-
-    /// <summary>
-    /// Gets or sets the task status.
-    /// </summary>
-    public TaskStatus Status { get; set; } = TaskStatus.Pending;
-
-    /// <summary>
-    /// Gets the creation timestamp (UTC).
-    /// </summary>
-    public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+    Spades,
+    Hearts,
+    Diamonds,
+    Clubs
 }
 ```
 
-#### TaskStatus.cs
+#### Card.cs
 ```csharp
-namespace MyTaskManager.Models;
+namespace HighLow.Models;
 
 /// <summary>
-/// Represents the status of a task.
+/// Represents a playing card with suit and value.
 /// </summary>
-public enum TaskStatus
+public record Card(Suit Suit, int Value)
 {
-    Pending,
-    Complete
+    /// <summary>
+    /// Gets the display string (e.g., "7♠", "K♥").
+    /// </summary>
+    public string Display => $"{ValueSymbol}{SuitSymbol}";
+
+    /// <summary>
+    /// Gets the full name (e.g., "7 of Spades").
+    /// </summary>
+    public string FullName => $"{ValueName} of {Suit}";
+
+    public string ValueSymbol => Value switch
+    {
+        1 => "A",
+        11 => "J",
+        12 => "Q",
+        13 => "K",
+        _ => Value.ToString()
+    };
+
+    public string ValueName => Value switch
+    {
+        1 => "Ace",
+        11 => "Jack",
+        12 => "Queen",
+        13 => "King",
+        _ => Value.ToString()
+    };
+
+    public char SuitSymbol => Suit switch
+    {
+        Suit.Spades => '♠',
+        Suit.Hearts => '♥',
+        Suit.Diamonds => '♦',
+        Suit.Clubs => '♣',
+        _ => '?'
+    };
+
+    /// <summary>
+    /// Compares this card to another. Returns positive if higher, negative if lower, 0 if equal.
+    /// </summary>
+    public int CompareTo(Card other) => Value.CompareTo(other.Value);
 }
+```
+
+#### GameState.cs
+```csharp
+namespace HighLow.Models;
+
+/// <summary>
+/// Represents the current state of a game.
+/// </summary>
+public class GameState
+{
+    public Card CurrentCard { get; set; } = null!;
+    public int CardsRemaining { get; set; }
+    public int Score { get; set; }
+    public int CurrentStreak { get; set; }
+    public int LongestStreak { get; set; }
+    public int CorrectGuesses { get; set; }
+    public int TotalGuesses { get; set; }
+    public int Ties { get; set; }
+    public List<double> ResponseTimes { get; } = new();
+    public bool IsGameOver { get; set; }
+}
+```
+
+#### GuessResult.cs
+```csharp
+namespace HighLow.Models;
+
+/// <summary>
+/// Result of a player's guess.
+/// </summary>
+public record GuessResult(
+    bool IsCorrect,
+    bool IsTie,
+    Card PreviousCard,
+    Card NewCard,
+    int PointsEarned,
+    int SpeedBonus,
+    double StreakMultiplier,
+    double ElapsedSeconds
+);
 ```
 
 **Design Decisions:**
-- Use `Guid` for unique IDs (no collision risk)
-- Use `required` keyword for mandatory properties (C# 11+)
-- Use `init` for immutable properties where appropriate
-- Store timestamps in UTC for consistency
-- Status is mutable (can change from Pending to Complete)
+- Use `record` for immutable `Card` (value semantics)
+- Use `class` for mutable `GameState` (changes during game)
+- Card values: Ace=1, Jack=11, Queen=12, King=13
+- Comparison is strictly numeric
 
 ---
 
-### 2. Data Access Layer
+### 2. Deck Service
 
-#### ITaskRepository.cs (Interface)
+#### IDeckService.cs
 ```csharp
-namespace MyTaskManager.Storage;
+namespace HighLow.Services;
 
 /// <summary>
-/// Defines operations for task persistence.
+/// Manages deck creation and card drawing.
 /// </summary>
-public interface ITaskRepository
+public interface IDeckService
 {
-    /// <summary>
-    /// Loads all tasks from storage.
-    /// </summary>
-    Task<IReadOnlyList<Models.Task>> LoadTasksAsync();
-
-    /// <summary>
-    /// Saves all tasks to storage.
-    /// </summary>
-    Task SaveTasksAsync(IEnumerable<Models.Task> tasks);
+    void Shuffle(int? seed = null);
+    Card DrawCard();
+    int CardsRemaining { get; }
+    bool HasCards { get; }
 }
 ```
 
-#### TaskRepository.cs (Implementation)
+#### DeckService.cs
 **Responsibilities:**
-- Read/write JSON file at `~/.taskmanager/tasks.json`
-- Handle file creation on first run
-- Use atomic writes to prevent corruption
-- Handle errors gracefully (permissions, disk full, etc.)
+- Create standard 52-card deck
+- Shuffle using Fisher-Yates algorithm
+- Draw cards sequentially
+- Support seeded random for testing
 
 **Key Implementation Details:**
-- Use `System.Text.Json` for serialization
-- Use `JsonSerializerOptions` with:
-  - `WriteIndented = true` (human-readable)
-  - `PropertyNamingPolicy = JsonNamingPolicy.CamelCase`
-- Use `File.WriteAllTextAsync` with temp file + rename for atomicity
-- Create directory if it doesn't exist
-- Handle JSON deserialization errors (corrupted file)
+```csharp
+public class DeckService : IDeckService
+{
+    private readonly List<Card> _deck = new();
+    private int _currentIndex;
+    private Random _random;
 
-**Error Handling:**
-- `IOException`: Permission denied, disk full
-- `JsonException`: Corrupted JSON
-- `UnauthorizedAccessException`: No write permissions
+    public DeckService(int? seed = null)
+    {
+        _random = seed.HasValue ? new Random(seed.Value) : new Random();
+        InitializeDeck();
+    }
+
+    private void InitializeDeck()
+    {
+        _deck.Clear();
+        foreach (Suit suit in Enum.GetValues<Suit>())
+        {
+            for (int value = 1; value <= 13; value++)
+            {
+                _deck.Add(new Card(suit, value));
+            }
+        }
+    }
+
+    public void Shuffle(int? seed = null)
+    {
+        if (seed.HasValue)
+            _random = new Random(seed.Value);
+        
+        // Fisher-Yates shuffle
+        for (int i = _deck.Count - 1; i > 0; i--)
+        {
+            int j = _random.Next(i + 1);
+            (_deck[i], _deck[j]) = (_deck[j], _deck[i]);
+        }
+        _currentIndex = 0;
+    }
+
+    public Card DrawCard() => _deck[_currentIndex++];
+    public int CardsRemaining => _deck.Count - _currentIndex;
+    public bool HasCards => _currentIndex < _deck.Count;
+}
+```
 
 ---
 
-### 3. Business Logic Layer
+### 3. Scoring Service
 
-#### ITaskService.cs (Interface)
+#### IScoringService.cs
 ```csharp
-namespace MyTaskManager.Services;
+namespace HighLow.Services;
 
-/// <summary>
-/// Defines operations for task management.
-/// </summary>
-public interface ITaskService
+public interface IScoringService
 {
-    Task<Models.Task> AddTaskAsync(string title, string? description = null);
-    Task<IReadOnlyList<Models.Task>> GetAllTasksAsync();
-    Task<IReadOnlyList<Models.Task>> GetTasksByStatusAsync(TaskStatus status);
-    Task<Models.Task?> GetTaskByIdAsync(string taskId);
-    Task CompleteTaskAsync(string taskId);
-    Task DeleteTaskAsync(string taskId);
+    int CalculateScore(bool isCorrect, double elapsedSeconds, int currentStreak);
+    (int basePoints, int speedBonus, double multiplier) GetScoreBreakdown(
+        bool isCorrect, double elapsedSeconds, int currentStreak);
 }
 ```
 
-#### TaskService.cs (Implementation)
-**Responsibilities:**
-- Validate inputs (non-empty title, length limits)
-- Create new tasks with generated IDs
-- Load/filter tasks
-- Update task status
-- Delete tasks
-- Coordinate with repository for persistence
+#### ScoringService.cs
+**Scoring Formula:**
+```
+base_points = 10
+speed_bonus = max(0, 5 - floor(elapsed_seconds - 3))  // 5 if < 3s, decreases after
+streak_multiplier = 1.0 + (current_streak × 0.5)
+total = floor((base_points + speed_bonus) × streak_multiplier)
+```
 
-**Key Implementation Details:**
-- Validate title: trim whitespace, check not empty, check length < 200
-- Support partial IDs: match first N characters of GUID
-- Handle ambiguous partial IDs (error if multiple matches)
-- Always persist changes immediately after modification
-- Throw specific exceptions for different error cases:
-  - `ArgumentException`: Invalid input
-  - `TaskNotFoundException`: Task not found
-  - `InvalidOperationException`: Invalid state (e.g., already complete)
-
-**Validation Rules:**
+**Implementation:**
 ```csharp
-private void ValidateTitle(string title)
+public class ScoringService : IScoringService
 {
-    if (string.IsNullOrWhiteSpace(title))
-        throw new ArgumentException("Task title cannot be empty", nameof(title));
+    private const int BasePoints = 10;
+    private const int MaxSpeedBonus = 5;
+    private const double SpeedBonusThreshold = 3.0;
+    private const double StreakMultiplierIncrement = 0.5;
+
+    public int CalculateScore(bool isCorrect, double elapsedSeconds, int currentStreak)
+    {
+        if (!isCorrect) return 0;
+
+        var (basePoints, speedBonus, multiplier) = GetScoreBreakdown(isCorrect, elapsedSeconds, currentStreak);
+        return (int)Math.Floor((basePoints + speedBonus) * multiplier);
+    }
+
+    public (int basePoints, int speedBonus, double multiplier) GetScoreBreakdown(
+        bool isCorrect, double elapsedSeconds, int currentStreak)
+    {
+        if (!isCorrect) return (0, 0, 0);
+
+        var speedBonus = elapsedSeconds <= SpeedBonusThreshold 
+            ? MaxSpeedBonus 
+            : Math.Max(0, MaxSpeedBonus - (int)(elapsedSeconds - SpeedBonusThreshold));
+        
+        var multiplier = 1.0 + (currentStreak * StreakMultiplierIncrement);
+
+        return (BasePoints, speedBonus, multiplier);
+    }
+}
+```
+
+---
+
+### 4. Game Service
+
+#### IGameService.cs
+```csharp
+namespace HighLow.Services;
+
+public interface IGameService
+{
+    GameState StartNewGame(int? seed = null);
+    GuessResult ProcessGuess(bool guessedHigher, double elapsedSeconds);
+    GameStatistics GetFinalStatistics();
+}
+```
+
+#### GameService.cs
+**Responsibilities:**
+- Initialize new game with shuffled deck
+- Process player guesses
+- Update game state (score, streak, statistics)
+- Determine game over condition
+
+**Key Flow:**
+1. `StartNewGame()`: Shuffle deck, draw first card, initialize state
+2. `ProcessGuess()`: Compare cards, calculate score, update state, draw next card
+3. `GetFinalStatistics()`: Calculate and return end-game stats
+
+---
+
+### 5. Console Renderer
+
+#### IRenderer.cs
+```csharp
+namespace HighLow.Display;
+
+public interface IRenderer
+{
+    void ShowWelcomeScreen();
+    void ShowCard(Card card, GameState state);
+    void ShowGuessResult(GuessResult result, GameState state);
+    void ShowGameOver(GameStatistics stats);
+    void ShowError(string message);
+    char GetPlayerInput();
+}
+```
+
+#### ConsoleRenderer.cs
+**Responsibilities:**
+- Render ASCII art cards
+- Display game status (score, streak, cards remaining)
+- Show guess results with animations
+- Handle terminal output formatting
+
+**Card Display Format:**
+```
+┌─────────┐
+│ 7       │
+│         │
+│    ♠    │
+│         │
+│       7 │
+└─────────┘
+```
+
+**Implementation Notes:**
+- Use Console.Clear() for clean screen updates
+- Support both cards side-by-side for result display
+- Use colors if terminal supports (red for hearts/diamonds)
+- Fire emoji (🔥) for streaks ≥ 3
+
+---
+
+## Data Flow
+
+### Game Loop Sequence
+
+```mermaid
+sequenceDiagram
+    participant P as Player
+    participant G as GameService
+    participant D as DeckService
+    participant S as ScoringService
+    participant R as Renderer
+
+    P->>G: StartNewGame()
+    G->>D: Shuffle()
+    G->>D: DrawCard()
+    D-->>G: First Card
+    G-->>R: ShowCard()
     
-    if (title.Length > 200)
-        throw new ArgumentException("Task title cannot exceed 200 characters", nameof(title));
-}
-```
-
----
-
-### 4. Presentation Layer (CLI)
-
-#### Program.cs
-**Responsibilities:**
-- Parse command-line arguments using System.CommandLine
-- Route to appropriate command handlers
-- Handle top-level errors
-- Display help when no args provided
-
-**Structure:**
-```csharp
-var rootCommand = new RootCommand("Task Manager CLI");
-
-var addCommand = new Command("add", "Add a new task");
-addCommand.AddArgument(new Argument<string>("title"));
-addCommand.AddOption(new Option<string?>("--description"));
-addCommand.SetHandler(AddCommand.HandleAsync, ...);
-
-var listCommand = new Command("list", "List all tasks");
-listCommand.AddOption(new Option<TaskStatus?>("--status"));
-listCommand.SetHandler(ListCommand.HandleAsync, ...);
-
-// ... other commands
-
-rootCommand.AddCommand(addCommand);
-rootCommand.AddCommand(listCommand);
-// ... add other commands
-
-return await rootCommand.InvokeAsync(args);
-```
-
-#### Command Handlers
-
-Each command handler:
-1. Extract arguments/options from command line
-2. Validate inputs (basic validation, service does detailed)
-3. Call service methods
-4. Format output for console
-5. Handle errors and display user-friendly messages
-6. Return appropriate exit code (0 = success, 1 = user error, 2 = system error)
-
-**Example: AddCommand.cs**
-```csharp
-public static class AddCommand
-{
-    public static async Task<int> HandleAsync(
-        string title,
-        string? description,
-        ITaskService taskService)
-    {
-        try
-        {
-            var task = await taskService.AddTaskAsync(title, description);
-            
-            Console.WriteLine("Task added successfully!");
-            Console.WriteLine($"ID: {task.Id.ToString()[..8]}");
-            Console.WriteLine($"Title: {task.Title}");
-            Console.WriteLine($"Status: {task.Status}");
-            
-            return 0; // Success
-        }
-        catch (ArgumentException ex)
-        {
-            Console.WriteLine($"Error: {ex.Message}");
-            return 1; // User error
-        }
-        catch (IOException ex)
-        {
-            Console.WriteLine($"Error: Failed to save task. {ex.Message}");
-            return 2; // System error
-        }
-    }
-}
-```
-
-**Output Formatting:**
-- Use fixed-width columns for table display
-- Pad/truncate to fit terminal width
-- Use clear separators (dashes, pipes)
-- Show only first 8 chars of GUID for readability
-
----
-
-## Data Model & Storage
-
-### JSON File Format
-
-**Location:** `~/.taskmanager/tasks.json`
-
-**Format:**
-```json
-{
-  "tasks": [
-    {
-      "id": "a3f2d4e1-b5c7-4a9f-8d6e-2f1a3c4b5d6e",
-      "title": "Buy groceries",
-      "description": "Milk, eggs, bread",
-      "status": "Pending",
-      "createdAt": "2025-12-07T10:30:00Z"
-    },
-    {
-      "id": "b5c7a3f2-c1d8-4e9a-7f6b-3c2d1a4e5b6f",
-      "title": "Write report",
-      "description": null,
-      "status": "Complete",
-      "createdAt": "2025-12-06T15:45:00Z"
-    }
-  ]
-}
-```
-
-**Serialization Configuration:**
-```csharp
-var options = new JsonSerializerOptions
-{
-    WriteIndented = true,  // Human-readable
-    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,  // camelCase in JSON
-    DefaultIgnoreCondition = JsonIgnoreCondition.Never,  // Include nulls
-    Converters = { new JsonStringEnumConverter() }  // Enums as strings
-};
-```
-
-### Atomic Write Strategy
-
-To prevent corruption on crash/disk full:
-
-```csharp
-1. Serialize to JSON string in memory
-2. Write to temporary file: tasks.json.tmp
-3. Flush to disk
-4. Rename tasks.json.tmp → tasks.json (atomic operation)
-5. Delete old file if rename created backup
-```
-
-**Code pattern:**
-```csharp
-var tempFile = Path.Combine(directory, "tasks.json.tmp");
-var targetFile = Path.Combine(directory, "tasks.json");
-
-await File.WriteAllTextAsync(tempFile, json);
-File.Move(tempFile, targetFile, overwrite: true);  // Atomic on POSIX
+    loop Until deck empty
+        P->>G: ProcessGuess(higher/lower, time)
+        G->>D: DrawCard()
+        D-->>G: Next Card
+        G->>S: CalculateScore()
+        S-->>G: Points
+        G-->>R: ShowGuessResult()
+        R-->>P: Display result
+    end
+    
+    G-->>R: ShowGameOver()
 ```
 
 ---
 
 ## Error Handling Strategy
 
-### Error Categories
+### Input Validation
+- Invalid key: Show error message, don't count as guess, reprompt
+- Ctrl+C: Catch, show current stats, exit gracefully
 
-| Category | HTTP Equivalent | Exit Code | Examples |
-|----------|----------------|-----------|----------|
-| User Input Error | 400 Bad Request | 1 | Empty title, invalid ID |
-| Not Found | 404 Not Found | 1 | Task doesn't exist |
-| System Error | 500 Server Error | 2 | Permission denied, disk full |
-
-### Exception Hierarchy
-
-```mermaid
-flowchart TD
-    E[Exception] --> AE["ArgumentException<br/>(user input errors)"]
-    AE --> ANE[ArgumentNullException]
-    E --> TNF["TaskNotFoundException<br/>(custom, task not found)"]
-    E --> IO["IOException<br/>(file system errors)"]
-    IO --> UAE[UnauthorizedAccessException]
-    E --> JE["JsonException<br/>(corrupted data)"]
+### Exception Handling
+```csharp
+// In Program.cs
+Console.CancelKeyPress += (sender, e) =>
+{
+    e.Cancel = true;
+    var stats = gameService.GetFinalStatistics();
+    renderer.ShowGameOver(stats);
+    Environment.Exit(0);
+};
 ```
 
 ### Error Messages
-
-**Principles:**
-- Be specific about what went wrong
-- Tell user what they can do to fix it
-- Don't expose internal details (stack traces, file paths in production)
-
-**Examples:**
-```
-❌ Bad: "Error"
-✅ Good: "Task title cannot be empty"
-
-❌ Bad: "Failed to save"
-✅ Good: "Failed to save task. Check write permissions for ~/.taskmanager/"
-
-❌ Bad: "Invalid input"
-✅ Good: "Task not found: abc123. Use 'taskmanager list' to see valid IDs"
-```
-
-### Error Handling in Each Layer
-
-**Service Layer:**
-- Throw specific exceptions with clear messages
-- Don't catch exceptions (let them bubble up)
-
-**Repository Layer:**
-- Wrap file I/O exceptions with context
-- Transform `JsonException` into user-friendly message
-
-**Command Handlers:**
-- Catch exceptions at top level
-- Display user-friendly error messages
-- Return appropriate exit codes
-- Log errors for debugging
-
----
-
-## Dependencies & Libraries
-
-### NuGet Packages
-
-| Package | Version | Purpose |
-|---------|---------|---------|
-| System.CommandLine | >= 2.0.0 | CLI argument parsing |
-| System.Text.Json | (built-in) | JSON serialization |
-| xUnit | >= 2.6.0 | Unit testing framework |
-| Moq | >= 4.20.0 | Mocking for tests |
-
-### Installation Commands
-
-```bash
-# Main project
-dotnet add package System.CommandLine
-
-# Test project
-cd tests/MyTaskManager.Tests
-dotnet add package xUnit
-dotnet add package Moq
-dotnet add package Microsoft.NET.Test.Sdk
-```
-
-### Framework Requirements
-
-- **.NET SDK:** 8.0 or later
-- **C# Language:** 12 (for required keyword, file-scoped namespaces)
-- **Target Platforms:** Windows, macOS, Linux
-
----
-
-## Implementation Phases
-
-### Phase 1: Foundation (Day 1)
-**Goal:** Basic project structure and models
-
-- [ ] Create solution and project files
-- [ ] Set up folder structure
-- [ ] Create `Task` and `TaskStatus` models
-- [ ] Create `AGENTS.md` with conventions
-- [ ] Set up test project
-- [ ] Write unit tests for models
-
-**Deliverable:** Compiling project with models
-
----
-
-### Phase 2: Data Layer (Day 1-2)
-**Goal:** Persistence working
-
-- [ ] Implement `ITaskRepository` interface
-- [ ] Implement `TaskRepository` with JSON file operations
-- [ ] Handle file creation and directory setup
-- [ ] Implement atomic write strategy
-- [ ] Write unit tests for repository (use temp files)
-- [ ] Test error cases (permissions, corrupted JSON)
-
-**Deliverable:** Can save and load tasks from JSON
-
----
-
-### Phase 3: Business Logic (Day 2)
-**Goal:** Core task operations
-
-- [ ] Implement `ITaskService` interface
-- [ ] Implement `TaskService`
-  - [ ] AddTaskAsync with validation
-  - [ ] GetAllTasksAsync
-  - [ ] GetTasksByStatusAsync
-  - [ ] GetTaskByIdAsync (support partial IDs)
-  - [ ] CompleteTaskAsync
-  - [ ] DeleteTaskAsync
-- [ ] Write comprehensive unit tests
-- [ ] Mock repository in tests
-
-**Deliverable:** Task operations working with in-memory data
-
----
-
-### Phase 4: CLI Interface (Day 3)
-**Goal:** User-facing commands
-
-- [ ] Set up System.CommandLine in Program.cs
-- [ ] Implement `add` command handler
-- [ ] Implement `list` command handler
-- [ ] Implement `complete` command handler
-- [ ] Implement `delete` command handler
-- [ ] Format output (tables, colors if desired)
-- [ ] Display help text
-- [ ] Handle errors at CLI level
-
-**Deliverable:** Working CLI application
-
----
-
-### Phase 5: Integration & Testing (Day 3-4)
-**Goal:** End-to-end functionality
-
-- [ ] Wire up dependency injection (or manual instantiation)
-- [ ] Integration tests for full workflows
-- [ ] Test on all platforms (Windows, macOS, Linux)
-- [ ] Test edge cases from product requirements
-- [ ] Performance testing (10K tasks)
-- [ ] Fix bugs found in testing
-
-**Deliverable:** Tested, working application
-
----
-
-### Phase 6: Documentation & Polish (Day 4)
-**Goal:** Ready for use
-
-- [ ] Write README.md with installation and usage
-- [ ] Add XML documentation comments
-- [ ] Create user examples and demos
-- [ ] Package for distribution (if needed)
-- [ ] Final code review
-- [ ] Update AGENTS.md if patterns changed
-
-**Deliverable:** Shippable product
+- Clear, actionable messages
+- Don't crash on any user input
+- Log unexpected errors (optional)
 
 ---
 
@@ -590,73 +484,127 @@ dotnet add package Microsoft.NET.Test.Sdk
 
 **Coverage Target:** 80% minimum
 
-**Test Organization:**
-```
-/tests/MyTaskManager.Tests
-  /Models
-    TaskTests.cs          - Test Task model properties and behavior
-  /Services
-    TaskServiceTests.cs   - Test business logic with mocked repository
-  /Storage
-    TaskRepositoryTests.cs - Test JSON persistence (use temp files)
-```
-
-**Naming Convention:**
+#### CardTests.cs
 ```csharp
-[Method]_[Scenario]_[ExpectedResult]
-
-Examples:
-AddTask_WithValidData_ReturnsNewTask()
-AddTask_WithEmptyTitle_ThrowsArgumentException()
-GetTaskById_WithPartialId_ReturnsMatchingTask()
-SaveTasks_WhenDiskFull_ThrowsIOException()
-```
-
-**Test Pattern (AAA):**
-```csharp
-[Fact]
-public async Task AddTask_WithValidData_ReturnsNewTask()
+[Theory]
+[InlineData(1, "A")]
+[InlineData(10, "10")]
+[InlineData(11, "J")]
+[InlineData(12, "Q")]
+[InlineData(13, "K")]
+public void ValueSymbol_ReturnsCorrectSymbol(int value, string expected)
 {
-    // Arrange
-    var mockRepo = new Mock<ITaskRepository>();
-    var service = new TaskService(mockRepo.Object);
-    
-    // Act
-    var result = await service.AddTaskAsync("Test task");
-    
-    // Assert
-    Assert.NotNull(result);
-    Assert.Equal("Test task", result.Title);
-    Assert.Equal(TaskStatus.Pending, result.Status);
-    Assert.NotEqual(Guid.Empty, result.Id);
-    mockRepo.Verify(r => r.SaveTasksAsync(It.IsAny<IEnumerable<Task>>()), Times.Once);
+    var card = new Card(Suit.Spades, value);
+    Assert.Equal(expected, card.ValueSymbol);
+}
+
+[Fact]
+public void CompareTo_HigherCard_ReturnsPositive()
+{
+    var lower = new Card(Suit.Hearts, 5);
+    var higher = new Card(Suit.Clubs, 10);
+    Assert.True(higher.CompareTo(lower) > 0);
 }
 ```
 
-### Integration Tests
+#### ScoringServiceTests.cs
+```csharp
+[Theory]
+[InlineData(true, 2.0, 0, 15)]   // Fast, no streak
+[InlineData(true, 5.0, 0, 10)]   // Slow, no streak
+[InlineData(true, 2.0, 3, 37)]   // Fast, streak 3
+[InlineData(false, 1.0, 5, 0)]   // Wrong guess
+public void CalculateScore_VariousScenarios(
+    bool isCorrect, double seconds, int streak, int expected)
+{
+    var service = new ScoringService();
+    Assert.Equal(expected, service.CalculateScore(isCorrect, seconds, streak));
+}
+```
 
-Test complete workflows:
-- Add task → list → complete → list (verify state changes)
-- Add task → restart app → list (verify persistence)
-- Error paths (corrupted file, no permissions)
+#### DeckServiceTests.cs
+```csharp
+[Fact]
+public void Shuffle_WithSameSeed_ProducesSameOrder()
+{
+    var deck1 = new DeckService(42);
+    var deck2 = new DeckService(42);
+    deck1.Shuffle(42);
+    deck2.Shuffle(42);
 
-### Manual Testing
+    for (int i = 0; i < 52; i++)
+    {
+        Assert.Equal(deck1.DrawCard(), deck2.DrawCard());
+    }
+}
 
-**Test Matrix:**
+[Fact]
+public void DrawCard_UntilEmpty_Returns52Cards()
+{
+    var deck = new DeckService();
+    deck.Shuffle();
+    
+    var cards = new List<Card>();
+    while (deck.HasCards)
+    {
+        cards.Add(deck.DrawCard());
+    }
+    
+    Assert.Equal(52, cards.Count);
+    Assert.Equal(52, cards.Distinct().Count()); // All unique
+}
+```
 
-| Platform | .NET Version | Test Result |
-|----------|--------------|-------------|
-| Windows 11 | 8.0 | ✅ |
-| macOS 14 | 8.0 | ✅ |
-| Ubuntu 22.04 | 8.0 | ✅ |
+---
 
-**Test Scenarios:**
-1. Fresh installation (no storage file)
-2. Normal operations (add, list, complete, delete)
-3. Partial ID matching
-4. Error cases (empty title, invalid ID)
-5. Persistence across restarts
-6. Large dataset (1000+ tasks)
+## Implementation Phases
+
+### Phase 1: Models & Basic Services (1-2 hours)
+- [ ] Create Card, Suit, GameState models
+- [ ] Implement DeckService with shuffle
+- [ ] Implement ScoringService with formula
+- [ ] Write unit tests for all above
+
+**Deliverable:** Core logic working, all tests pass
+
+### Phase 2: Game Service (1 hour)
+- [ ] Implement GameService with game loop logic
+- [ ] Track state (score, streak, statistics)
+- [ ] Handle ties correctly
+- [ ] Write integration tests
+
+**Deliverable:** Can simulate a complete game programmatically
+
+### Phase 3: Console Display (1-2 hours)
+- [ ] Implement ConsoleRenderer
+- [ ] Create ASCII card art
+- [ ] Display game state, results, game over
+- [ ] Handle user input
+
+**Deliverable:** Playable game in terminal
+
+### Phase 4: Polish & Edge Cases (30 min)
+- [ ] Ctrl+C handling
+- [ ] Invalid input handling
+- [ ] Perfect game message
+- [ ] Play again flow
+
+**Deliverable:** Production-ready game
+
+---
+
+## Dependencies & Libraries
+
+### NuGet Packages
+
+| Package | Version | Purpose |
+|---------|---------|---------|
+| xUnit | >= 2.6.0 | Unit testing |
+| xUnit.runner.visualstudio | >= 2.6.0 | Test runner |
+| Microsoft.NET.Test.Sdk | >= 17.8.0 | Test infrastructure |
+
+### No External Runtime Dependencies
+This project intentionally uses only .NET built-in libraries.
 
 ---
 
@@ -664,68 +612,15 @@ Test complete workflows:
 
 ### Expected Performance
 
-| Operation | Time | Notes |
-|-----------|------|-------|
-| Add task | < 20ms | Including file write |
-| List tasks | < 10ms | For 1000 tasks |
-| Complete task | < 20ms | Including file write |
-| Application startup | < 50ms | Cold start |
+| Operation | Target | Notes |
+|-----------|--------|-------|
+| Startup | < 100ms | Minimal initialization |
+| Shuffle | < 1ms | 52 cards, in-memory |
+| Draw card | < 1μs | Array index lookup |
+| Score calculation | < 1μs | Simple math |
+| Render card | < 10ms | Console output |
 
-### Optimization Strategies
-
-**If performance issues arise:**
-
-1. **Lazy loading:** Load tasks only when needed (not on startup)
-2. **Caching:** Keep tasks in memory between operations
-3. **Async I/O:** Already using `async`/`await`
-4. **Pagination:** For very large lists (10K+ tasks)
-5. **Indexing:** Build in-memory ID index for faster lookups
-
-**Not needed for v1.0 (premature optimization).**
-
----
-
-## Security Considerations
-
-### Data Security
-- Store in user's home directory only
-- Rely on OS file permissions
-- No encryption (not sensitive data)
-- No authentication (single-user)
-
-### Input Validation
-- **Prevent path traversal:** Don't allow user to specify file paths
-- **Prevent injection:** Properly escape in JSON (handled by System.Text.Json)
-- **Validate lengths:** Prevent extremely large inputs
-
-### Error Messages
-- Don't expose internal paths in production
-- Don't include stack traces in user-facing errors
-- Log detailed errors separately for debugging
-
----
-
-## Risks & Mitigation
-
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Data loss on crash | High | Atomic file writes |
-| Corrupted JSON file | Medium | Validation on load, clear error message |
-| Concurrent access | Medium | Document limitation, consider file locking in v2.0 |
-| Performance with large datasets | Low | Test with 10K tasks, optimize if needed |
-| Cross-platform path issues | Medium | Use Path.Combine, test on all platforms |
-| .NET not installed | High | Clear installation instructions in README |
-
----
-
-## Open Technical Questions
-
-| # | Question | Options | Decision | Decided By | Date |
-|---|----------|---------|----------|------------|------|
-| 1 | Use dependency injection? | A) Yes (Microsoft.Extensions.DI) B) No (manual) | Manual (B) - simpler for CLI | Tech Lead | 2025-12-07 |
-| 2 | Logging framework? | A) Yes (Serilog) B) No (Console only) | No (B) - keep it simple | Tech Lead | 2025-12-07 |
-| 3 | Color output in terminal? | A) Yes (add library) B) No (plain text) | No (B) - defer to v2.0 | Product Owner | 2025-12-07 |
-| 4 | Package as single executable? | A) Yes (publish trimmed) B) No (requires .NET) | TBD | Tech Lead | TBD |
+No optimization needed for this simple game.
 
 ---
 
@@ -733,58 +628,32 @@ Test complete workflows:
 
 Feature is complete when:
 
-- [ ] All code is written and follows AGENTS.md conventions
+- [ ] All code follows AGENTS.md conventions
 - [ ] All unit tests pass with >= 80% coverage
-- [ ] All acceptance criteria from Product Requirements are verified
-- [ ] Integration tests pass
-- [ ] Tested on Windows, macOS, and Linux
-- [ ] README.md is written with clear usage instructions
-- [ ] XML documentation comments on all public APIs
-- [ ] Code reviewed by [reviewer name]
-- [ ] No critical or high-priority bugs
-- [ ] Performance meets requirements (< 100ms commands)
-
----
-
-## Related Documents
-
-- **Product Requirements:** `PRODUCT-REQUIREMENTS.md` (what to build)
-- **AGENTS.md:** Project coding conventions
-- **README.md:** User documentation
-- **Test Plan:** (if separate document)
-
----
-
-## Revision History
-
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 0.1 | 2025-12-07 | [Name] | Initial technical design |
-| 0.2 | 2025-12-08 | [Name] | Added error handling details |
-| 1.0 | 2025-12-09 | [Name] | Approved for implementation |
+- [ ] All acceptance criteria verified
+- [ ] Works on Windows, macOS, Linux
+- [ ] README.md has clear instructions
+- [ ] Ctrl+C exits gracefully
+- [ ] No crashes on any input
+- [ ] Code reviewed
 
 ---
 
 ## Notes for Implementation
 
 **Before starting:**
-1. Review Product Requirements document thoroughly
-2. Review AGENTS.md for coding conventions
-3. Set up development environment (.NET 8.0 SDK, IDE)
-4. Create feature branch in git
+1. Review Product Requirements document
+2. Review AGENTS.md conventions
+3. Set up .NET 8.0 project structure
 
 **During implementation:**
-1. Follow the phases in order
-2. Write tests alongside code (TDD approach)
-3. Commit frequently with clear messages
-4. Run tests after each change
-5. Refer back to this plan when uncertain
+1. Write tests first (TDD)
+2. Start with models and scoring (easy to test)
+3. Add game service next
+4. Add display last (hardest to test)
 
-**If you encounter issues:**
-1. Check if product requirements are clear
-2. Update this plan if assumptions change
-3. Discuss with team if design needs revision
-4. Document any deviations and rationale
-
-**This is a LIVING DOCUMENT:**
-Update it as you learn and as design evolves during implementation.
+**Key reminders:**
+- Aces are always low (value 1)
+- Ties: 0 points, streak continues
+- Speed bonus starts decreasing after 3 seconds
+- Use seeded Random for deterministic tests

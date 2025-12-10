@@ -15,14 +15,15 @@ In this lab, you will:
 
 ---
 
-## The Project: Task Manager CLI
+## The Project: HighLow Card Game CLI
 
-You'll build a simple command-line task manager with these features:
-- Add tasks
-- List tasks (all, or filter by status)
-- Mark tasks complete
-- Delete tasks
-- Persist tasks to a JSON file
+You'll build a command-line card guessing game with these features:
+- Play through a standard 52-card deck
+- Guess if the next card is higher or lower than the current card
+- Score based on accuracy, speed, and streak multipliers
+- Ties (same value) score zero points
+- Game ends when the deck is exhausted
+- Display final score with statistics
 
 ---
 
@@ -32,7 +33,7 @@ You'll build a simple command-line task manager with these features:
 
 ### Step 1.1: Create the file
 
-In your workspace, create: `/01-greenfield/MyTaskManager/AGENTS.md`
+In your workspace, create: `/01-greenfield/HighLow/AGENTS.md`
 
 ### Step 1.2: Define your project
 
@@ -44,9 +45,10 @@ Use the [AGENTS-TEMPLATE.md](./AGENTS-TEMPLATE.md) as a starting point, or write
 
 **Start with a question:**
 ```
-"I'm building a C# CLI task manager application using .NET 8.0.
-Help me create an AGENTS.md file. What sections should I include
-and what conventions should I document?"
+I'm building a C# CLI card game called HighLow using .NET 8.0.
+The game uses a standard 52-card deck. Players guess if the next 
+card is higher or lower. Help me create an AGENTS.md file. 
+What sections should I include and what conventions should I document?
 ```
 
 Then customize the agent's suggestions. Here's what to include:
@@ -55,78 +57,95 @@ Then customize the agent's suggestions. Here's what to include:
 # AGENTS.md
 
 ## Project Overview
-A command-line task manager built in C#. Users can add, list, complete, and delete tasks via CLI commands.
+A command-line high/low card guessing game built in C#. Players see a card 
+and guess whether the next card will be higher or lower in value.
 
 ## Tech Stack
 - Language: C# 12
 - Framework: .NET 8.0
-- CLI Framework: System.CommandLine
-- Data Storage: JSON file
 - Testing: xUnit
+- No external dependencies required
 
 ## Project Structure
-/MyTaskManager
+/HighLow
   /src
-    /Commands      - CLI command handlers
-    /Models        - Task, TaskStatus, etc.
-    /Services      - Business logic (TaskService)
-    /Storage       - JSON persistence (TaskRepository)
+    /HighLow
+      /Models        - Card, Deck, GameState, Score
+      /Services      - GameService, ScoringService
+      /Display       - ConsoleRenderer for card display
+      Program.cs
   /tests
-    /MyTaskManager.Tests  - Unit tests
+    /HighLow.Tests   - Unit tests
   AGENTS.md
   README.md
 
 ## Coding Conventions
 - Use C# 12 features (primary constructors, file-scoped namespaces)
-- Async/await for all I/O operations
+- Immutable models where possible (records for Card)
 - Dependency injection where appropriate
 - XML documentation comments on public APIs
 - One class per file
-- Namespace: MyTaskManager.[folder]
+- Namespace: HighLow.[folder]
 
 ## Naming Conventions
 - PascalCase for classes, methods, properties
 - camelCase for parameters, local variables
-- Prefix interfaces with 'I': ITaskRepository
-- Suffix async methods with 'Async': SaveTasksAsync
+- Prefix interfaces with 'I': IGameService
+- Suffix async methods with 'Async': SaveScoreAsync
 
-## Error Handling
-- Use exceptions for exceptional cases
-- Return Result<T> pattern for expected failures
-- Log errors but don't swallow them
-- Validate input at command boundaries
+## Card Representation
+- Use Unicode suit symbols: ♠ ♥ ♦ ♣
+- Card values: A=1, 2-10, J=11, Q=12, K=13
+- Aces are always low (value 1)
+
+## Scoring System
+- Base points per correct guess: 10
+- Time bonus: max 5 points, decreases 1 point per second after 3 seconds
+- Streak multiplier: 1x base, +0.5x for each consecutive correct guess
+- Ties (same value): 0 points, streak continues
 
 ## Testing Standards
 - Test class name: [ClassUnderTest]Tests
 - Test method name: [Method]_[Scenario]_[ExpectedResult]
 - Use Arrange-Act-Assert pattern
-- Mock external dependencies (file I/O, etc.)
+- Mock random card shuffling for deterministic tests
 
 ## Instructions for Agents
 1. Always create tests alongside implementation
 2. Follow existing patterns in the codebase
 3. Use dependency injection for services
-4. Keep commands thin—business logic goes in services
-5. Ensure all async methods are properly awaited
-6. Never hardcode file paths—use configuration
+4. Keep Program.cs thin—game logic goes in services
+5. Display cards using Unicode symbols
+6. Handle Ctrl+C gracefully (show final score)
 
 ## Example Code Style
 
-```csharp
-namespace MyTaskManager.Models;
+\`\`\`csharp
+namespace HighLow.Models;
 
 /// <summary>
-/// Represents a task item.
+/// Represents a playing card.
 /// </summary>
-public class TaskItem
+public record Card(Suit Suit, int Value)
 {
-    public Guid Id { get; init; }
-    public required string Title { get; init; }
-    public string? Description { get; init; }
-    public TaskStatus Status { get; set; } = TaskStatus.Pending;
-    public DateTime CreatedAt { get; init; }
+    public string Display => $"{ValueSymbol}{SuitSymbol}";
+    
+    private string ValueSymbol => Value switch
+    {
+        1 => "A", 11 => "J", 12 => "Q", 13 => "K",
+        _ => Value.ToString()
+    };
+    
+    private char SuitSymbol => Suit switch
+    {
+        Suit.Spades => '♠',
+        Suit.Hearts => '♥',
+        Suit.Diamonds => '♦',
+        Suit.Clubs => '♣',
+        _ => '?'
+    };
 }
-```
+\`\`\`
 ```
 
 ### Step 1.3: Review and refine
@@ -142,11 +161,11 @@ Read through your `AGENTS.md`:
 
 ## Part 2: Write Product Requirements and Implementation Plan (10 minutes)
 
-Now write requirements and a plan for what the application should do.cation should do.
+Now write requirements and a plan for what the application should do.
 
 ### Step 2.1: Create requirements document
 
-Create: `/01-greenfield/MyTaskManager/requirements/TASK-MANAGER-REQUIREMENTS.md`EQUIREMENTS.md`
+Create: `/01-greenfield/HighLow/requirements/HIGHLOW-REQUIREMENTS.md`
 
 ### Step 2.2: Write the requirements
 
@@ -155,125 +174,148 @@ Use the [PRODUCT-REQUIREMENTS-TEMPLATE.md](./PRODUCT-REQUIREMENTS-TEMPLATE.md) a
 **Example requirements document:**
 
 ```markdown
-# Feature: Task Manager CLI
+# Feature: HighLow Card Game
 
 ## Overview
-A command-line application that allows users to manage a personal todo list.
-Tasks persist to a local JSON file between sessions.
+A command-line card guessing game where players predict whether the next
+card will be higher or lower than the current card. Players earn points
+based on accuracy, speed, and building streaks.
 
 ## Requirements
-- [ ] Add new tasks with title and optional description
-- [ ] List all tasks showing: ID, title, status
-- [ ] Filter tasks by status (pending, complete)
-- [ ] Mark tasks as complete
-- [ ] Delete tasks by ID
-- [ ] Persist tasks to `~/.taskmanager/tasks.json`
-- [ ] Handle errors gracefully (file doesn't exist, invalid ID, etc.)
+- [ ] Display current card using Unicode suit symbols (♠ ♥ ♦ ♣)
+- [ ] Accept player input: 'h' for higher, 'l' for lower, 'q' to quit
+- [ ] Reveal next card and show if guess was correct
+- [ ] Calculate score with time, accuracy, and streak factors
+- [ ] Ties (same value) award zero points but don't break streak
+- [ ] Continue until deck is exhausted (51 guesses from 52 cards)
+- [ ] Display final score with statistics
 
-## Commands
+## Game Flow
 
-### add
-**Usage:** `taskmanager add "Task title" [--description "Details"]`
+### Start
+**Display:**
+\`\`\`
+╔════════════════════════════════════════╗
+║         HIGH/LOW CARD GAME             ║
+╠════════════════════════════════════════╣
+║  Guess if the next card is higher      ║
+║  or lower than the current card.       ║
+║                                        ║
+║  Scoring:                              ║
+║  • Correct guess: 10 points            ║
+║  • Speed bonus: up to 5 points         ║
+║  • Streak multiplier: +50% per streak  ║
+║  • Tie (same value): 0 points          ║
+╚════════════════════════════════════════╝
 
-**Behavior:**
-- Creates new task with unique ID
-- Sets status to Pending
-- Records creation timestamp
-- Saves to JSON file
-- Prints: "Task added: [ID]"
+Press ENTER to start...
+\`\`\`
 
-**Example:**
-```bash
-$ taskmanager add "Buy groceries" --description "Milk, eggs, bread"
-Task added: a3f2d4e1-...
-```
+### Gameplay
+**Display:**
+\`\`\`
+Cards remaining: 45    Score: 125    Streak: 3 ��
 
-### list
-**Usage:** `taskmanager list [--status pending|complete]`
+  ┌─────────┐
+  │ 7       │
+  │         │
+  │    ♠    │
+  │         │
+  │       7 │
+  └─────────┘
 
-**Behavior:**
-- Lists tasks in table format
-- If --status provided, filters by status
-- Shows: ID (first 8 chars), Title, Status, Created
+[H]igher or [L]ower? (Q to quit): _
+\`\`\`
 
-**Example:**
-```bash
-$ taskmanager list
-ID       | Title          | Status  | Created
----------|----------------|---------|----------
-a3f2d4e1 | Buy groceries  | Pending | 2025-12-07
-b5c7a3f2 | Write report   | Complete| 2025-12-06
-```
+### Result
+**Display (correct):**
+\`\`\`
+  ┌─────────┐      ┌─────────┐
+  │ 7       │  →   │ J       │
+  │         │      │         │
+  │    ♠    │      │    ♥    │
+  │         │      │       J │
+  │       7 │      └─────────┘
+  └─────────┘
 
-### complete
-**Usage:** `taskmanager complete <task-id>`
+✓ Correct! Jack of Hearts (11) is HIGHER than 7 of Spades (7)
+  +10 base  +4 speed bonus  x2.0 streak = 28 points!
+\`\`\`
 
-**Behavior:**
-- Marks task as Complete
-- Saves to JSON file
-- Prints: "Task completed: [Title]"
-- Error if ID not found
+### Game Over
+**Display:**
+\`\`\`
+╔════════════════════════════════════════╗
+║            GAME OVER!                  ║
+╠════════════════════════════════════════╣
+║  Final Score: 847                      ║
+║                                        ║
+║  Statistics:                           ║
+║  • Correct guesses: 38/51 (74.5%)      ║
+║  • Longest streak: 12                  ║
+║  • Average response: 2.3 seconds       ║
+║  • Ties: 3                             ║
+╚════════════════════════════════════════╝
 
-### delete
-**Usage:** `taskmanager delete <task-id>`
-
-**Behavior:**
-- Removes task from list
-- Saves to JSON file
-- Prints: "Task deleted: [Title]"
-- Error if ID not found
+Play again? (Y/N): _
+\`\`\`
 
 ## Acceptance Criteria
 
-### AC1: Task Persistence
-- Given tasks exist in memory
-- When the application exits
-- Then tasks are saved to JSON file
-- And reloaded on next run
+### AC1: Card Display
+- Given the game is running
+- When a card is displayed
+- Then it shows the value and Unicode suit symbol
+- And the card is rendered in ASCII art box
 
-### AC2: Valid Commands
-- Given I run `taskmanager add "Test"`
-- When the command executes
-- Then a new task is created
-- And I see confirmation with task ID
+### AC2: Valid Input
+- Given a card is displayed
+- When I press 'h' or 'H'
+- Then my guess is recorded as "higher"
+- And the next card is revealed
 
-### AC3: Invalid Task ID
-- Given I run `taskmanager complete invalid-id`
-- When the command executes
-- Then I see error: "Task not found: invalid-id"
-- And application exits with code 1
+### AC3: Correct Guess Scoring
+- Given the current card is 7♠
+- When I guess "higher"
+- And the next card is J♥ (value 11)
+- Then I receive base points + speed bonus
+- And my streak increases by 1
 
-### AC4: Empty List
-- Given no tasks exist
-- When I run `taskmanager list`
-- Then I see "No tasks found."
+### AC4: Tie Handling
+- Given the current card is 7♠
+- When the next card is 7♦ (same value)
+- Then I receive 0 points
+- And my streak is NOT reset
+- And I see "Tie! Same value."
+
+### AC5: Game End
+- Given I've made 51 guesses (deck exhausted)
+- When the last card is revealed
+- Then I see the Game Over screen
+- And my final statistics are displayed
 
 ## Non-Functional Requirements
-- Commands should respond in < 100ms
-- JSON file should be human-readable (pretty-printed)
-- Application size should be reasonable (< 10 MB)
+- Game should respond instantly to input (< 50ms)
+- Card display should work in any terminal supporting Unicode
+- Game state should not persist between sessions (fresh game each time)
 
 ## Out of Scope (for this iteration)
-- Task priorities or due dates
-- Task categories/tags
-- Sync across devices
-- Recurring tasks
-
-## Technical Constraints
-- Must work on Windows, macOS, Linux
-- Must be compatible with .NET 8.0
-- File path should be cross-platform compatible
+- High score persistence
+- Multiple difficulty levels
+- Joker cards
+- Multi-player mode
+- Card counting hints
 
 ## Implementation Plan
-1. Create Models folder with TaskItem and TaskStatus classes
-2. Create Services folder with TaskService for business logic
-3. Create Storage folder with TaskRepository for JSON persistence
-4. Implement command handlers in Program.cs
-5. Add error handling following AGENTS.md patterns
-6. Write unit tests for each component
+1. Create Models folder with Card, Deck, Suit, GameState classes
+2. Create Services folder with GameService (game loop) and ScoringService
+3. Create Display folder with ConsoleRenderer for ASCII card art
+4. Implement main game loop in Program.cs
+5. Add unit tests for scoring logic and deck shuffling
+6. Add error handling for invalid input
 ```
 
-### Step 2.3: Review your requirementsirements
+### Step 2.3: Review your requirements
 
 Ask yourself:
 - Can I test these requirements?
@@ -295,9 +337,8 @@ Now let the AI agent build your application!
 Create a new C# console application following the structure defined in AGENTS.md.
 Set up the project with:
 - .NET 8.0 console app
-- System.CommandLine NuGet package
 - xUnit testing project
-- Folder structure as specified
+- Folder structure as specified (Models, Services, Display)
 
 Don't implement features yet—just create the skeleton.
 ```
@@ -311,34 +352,39 @@ Don't implement features yet—just create the skeleton.
 
 **Prompt to agent:**
 ```
-Implement the Task Manager CLI application according to requirements/TASK-MANAGER-REQUIREMENTS.md.
+Implement the HighLow card game according to requirements/HIGHLOW-REQUIREMENTS.md.
 Follow all conventions in AGENTS.md.
 Include unit tests for:
-- TaskService business logic
-- TaskRepository persistence
-- Command handlers
+- Card comparison logic
+- Scoring calculations (base, speed, streak)
+- Deck shuffling (use seeded random for tests)
 
-Use dependency injection to wire up services.
+Start with the core game loop, then add the fancy display.
 ```
 
 **Watch for:**
 - Does the agent follow your AGENTS.md conventions?
-- Are namespaces correct?
-- Is code commented as specified?
+- Are card symbols displaying correctly?
+- Is the scoring formula implemented correctly?
 
 ### Step 3.3: Build and test
 
 Run the project:
 ```bash
-cd MyTaskManager/src
+cd HighLow/src/HighLow
 dotnet build
-dotnet run -- add "Test task"
-dotnet run -- list
+dotnet run
 ```
+
+Play a few rounds to verify:
+- Cards display with Unicode symbols
+- Higher/Lower logic works correctly
+- Scoring appears reasonable
+- Game ends after 51 guesses
 
 Run tests:
 ```bash
-cd MyTaskManager/tests/MyTaskManager.Tests
+cd HighLow/tests/HighLow.Tests
 dotnet test
 ```
 
@@ -350,59 +396,70 @@ Issues will arise. Practice fixing them by **updating requirements**, not editin
 
 ### Common scenarios:
 
-#### Scenario A: Output format isn't what you wanted
+#### Scenario A: Card display doesn't look right
 
-**DON'T:** Edit the command handler code directly
+**DON'T:** Edit the ConsoleRenderer code directly
 
-**DO:** Update the requirements with more precise format requirements:
+**DO:** Update the requirements with more precise display requirements:
 ```markdown
-## Output Format for List Command
+## Card Display Format
 
-Display tasks in a table with fixed-width columns:
-- ID: 8 characters
-- Title: 30 characters (truncate with ...)
-- Status: 10 characters
-- Created: 10 characters (yyyy-MM-dd format)
-
-Use Unicode box-drawing characters for borders.
+Display cards in a 9x11 character box:
+\`\`\`
+┌─────────┐
+│ A       │
+│         │
+│    ♠    │
+│         │
+│       A │
+└─────────┘
+\`\`\`
+- Value in top-left (left-aligned)
+- Value in bottom-right (right-aligned)  
+- Suit symbol centered
+- Use box-drawing characters (─ │ ┌ ┐ └ ┘)
 ```
 
-Then prompt agent: "Regenerate the list command using updated requirements."
+Then prompt agent: "Update the card display using the format in requirements."
 
-#### Scenario B: Error handling isn't robust
+#### Scenario B: Scoring feels wrong
 
-**DON'T:** Add try-catch blocks manually
+**DON'T:** Tweak the scoring numbers in code
 
-**DO:** Add to AGENTS.md error handling section and update implementation plan:
+**DO:** Add precise scoring rules to requirements:
 ```markdown
-## Error Handling Pattern
+## Scoring Formula
 
-All commands should:
-1. Validate input first
-2. Wrap I/O operations in try-catch
-3. Return specific error codes:
-   - 0: Success
-   - 1: Invalid arguments
-   - 2: File I/O error
-   - 3: Task not found
-4. Log exceptions to ~/.taskmanager/errors.log
+base_points = 10
+speed_bonus = max(0, 5 - seconds_elapsed) where seconds_elapsed > 3
+streak_multiplier = 1 + (streak_count * 0.5)
+
+total_points = (base_points + speed_bonus) * streak_multiplier
+
+Examples:
+- Correct in 2 seconds, streak of 3: (10 + 5) * 2.5 = 37.5 → 38 points
+- Correct in 5 seconds, streak of 0: (10 + 0) * 1.0 = 10 points
+- Tie: 0 points regardless of streak
 ```
 
-Prompt: "Update all commands to follow the error handling pattern in AGENTS.md."
+Prompt: "Update ScoringService to match the exact formula in requirements."
 
-#### Scenario C: JSON serialization issue
+#### Scenario C: Edge case with Aces
 
-**DON'T:** Fix JSON options manually
+**DON'T:** Add a special case in the comparison code
 
-**DO:** Add serialization guidance to AGENTS.md:
+**DO:** Clarify in requirements:
 ```markdown
-## JSON Serialization
+## Card Values
 
-Use System.Text.Json with options:
-- WriteIndented = true
-- PropertyNamingPolicy = CamelCase
-- Include all properties
-- Handle null values gracefully
+- Ace = 1 (always low)
+- 2-10 = face value
+- Jack = 11
+- Queen = 12
+- King = 13
+
+Comparison is strictly by numeric value.
+Ace (1) is lower than all other cards.
 ```
 
 ---
@@ -427,7 +484,8 @@ Use System.Text.Json with options:
    - Was the implementation plan clear enough?
    - What edge cases did you miss?
 
-5. **When did spec-first feel natural? When did it feel forced?**
+5. **Was the game fun to build?**
+   - Did the interactive nature make testing more engaging?
 
 ---
 
@@ -435,21 +493,22 @@ Use System.Text.Json with options:
 
 If you finish early:
 
-### Challenge 1: Add a new feature
-Add task editing (change title/description) using requirements-first approach:
-1. Write requirements with edit command details and implementation plan
-2. Let agent implement
-3. Verify against requirements
+### Challenge 1: Add a High Score System
+Add persistent high scores using requirements-first approach:
+1. Write requirements for saving/loading top 10 scores to JSON
+2. Include player name input
+3. Let agent implement
+4. Verify against requirements
 
-### Challenge 2: Add task priorities
-- Update AGENTS.md with Priority enum
-- Write requirements and implementation plan for priority filtering
+### Challenge 2: Add Card Counting Hints
+- Update AGENTS.md with hint display conventions
+- Write requirements showing remaining cards probabilities
 - Implement via agent
 
-### Challenge 3: Improve test coverage
-- Write test requirements for edge cases you discovered
-- Agent generates tests
-- Verify coverage with `dotnet test --collect:"XPlat Code Coverage"`
+### Challenge 3: Improve Visual Polish
+- Write requirements for colored output (red hearts/diamonds)
+- Add card flip animation (optional)
+- Verify terminal compatibility
 
 ---
 
@@ -459,8 +518,8 @@ Add task editing (change title/description) using requirements-first approach:
 ✅ **Requirements should be testable** - If you can't test it, refine it  
 ✅ **Include an implementation plan** - Guide the agent on how to structure the solution  
 ✅ **Iterate on requirements, not code** - Fix the input when output is wrong  
-✅ **Examples are powerful** - Show, don't just tell  
-✅ **Agents amplify clarity** - Garbage in, garbage out  
+✅ **Examples are powerful** - Show the exact output format you want  
+✅ **Games are fun to test** - Interactive apps give immediate feedback  
 
 ---
 

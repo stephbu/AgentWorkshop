@@ -127,7 +127,7 @@ The workflow:
 ### During the Workshop
 
 1. **Greenfield Lab:** Work through `/01-greenfield/INSTRUCTIONS.md`
-   - Create a task manager CLI from scratch
+   - Create a HighLow card game CLI from scratch
    - Learn to write AGENTS.md and Product Requirements
    - Practice requirements-driven development
 
