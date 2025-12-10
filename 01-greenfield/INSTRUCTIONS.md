@@ -175,6 +175,25 @@ Create: `/01-greenfield/HighLow/docs/PRODUCT-REQUIREMENTS.md`
 
 Use the [PRODUCT-REQUIREMENTS-TEMPLATE.md](./PRODUCT-REQUIREMENTS-TEMPLATE.md) and [IMPLEMENTATION-PLAN-TEMPLATE.md](./IMPLEMENTATION-PLAN-TEMPLATE.md) or create your own.
 
+**💡 Pro Tip: Let the agent help populate the template!**
+
+**Start with a question:**
+```
+I'm creating product requirements for my HighLow card game. 
+Here's the template I'm using: [paste template or reference file]
+
+Can you help me fill this out? Ask me questions about the 
+gameplay, scoring rules, and user experience so we can 
+complete each section together.
+```
+
+The agent will ask clarifying questions like:
+- "What happens when the player guesses incorrectly?"
+- "Should there be difficulty levels?"
+- "How should ties be handled?"
+
+Answer these questions to collaboratively build comprehensive requirements.
+
 **Example requirements document:**
 
 ```markdown
