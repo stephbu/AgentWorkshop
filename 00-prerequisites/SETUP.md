@@ -40,7 +40,43 @@ Should display version 1.85 or later.
 
 ---
 
-### 2. Install .NET SDK
+### 2. Clone the Workshop Repository
+
+Clone the workshop materials to a folder in your home directory.
+
+**macOS (Terminal):**
+```bash
+# Create a workshop folder in your home directory
+mkdir -p ~/workshop
+cd ~/workshop
+
+# Clone the workshop repository
+git clone https://github.com/stephbu/AgentWorkshop.git
+
+# Navigate to the workshop folder
+cd AgentWorkshop
+```
+
+**Windows (PowerShell):**
+```powershell
+# Create a workshop folder in your home directory
+New-Item -ItemType Directory -Force -Path $HOME\workshop
+cd $HOME\workshop
+
+# Clone the workshop repository
+git clone https://github.com/stephbu/AgentWorkshop.git
+
+# Navigate to the workshop folder
+cd AgentWorkshop
+```
+
+**Verify:**
+- You should now have `~/workshop/AgentWorkshop` (macOS) or `%USERPROFILE%\workshop\AgentWorkshop` (Windows)
+- The folder contains `00-prerequisites/`, `01-greenfield/`, `02-brownfield/`, and other workshop files
+
+---
+
+### 3. Install .NET SDK
 
 **Download:** https://dotnet.microsoft.com/download
 
@@ -81,7 +117,7 @@ You should see at least one SDK version 8.0.x or higher.
 
 ---
 
-### 3. Install GitHub Copilot Extension
+### 4. Install GitHub Copilot Extension
 
 **In VS Code:**
 
@@ -99,7 +135,7 @@ You should see at least one SDK version 8.0.x or higher.
 
 ---
 
-### 4. GitHub EMU Setup
+### 5. GitHub EMU Setup
 
 Your organization should have provisioned a GitHub Enterprise Managed User (EMU) account for you.
 
@@ -115,7 +151,7 @@ Your organization should have provisioned a GitHub Enterprise Managed User (EMU)
 
 ---
 
-### 5. Authenticate Copilot with GitHub EMU
+### 6. Authenticate Copilot with GitHub EMU
 
 **In VS Code:**
 
@@ -132,7 +168,7 @@ Your organization should have provisioned a GitHub Enterprise Managed User (EMU)
 
 ---
 
-### 6. Enable Agent Mode
+### 7. Enable Agent Mode
 
 **In VS Code:**
 
@@ -150,52 +186,6 @@ Your organization should have provisioned a GitHub Enterprise Managed User (EMU)
 
 ---
 
-### 7. Git Configuration (EMU)
-
-Configure Git with your EMU credentials:
-
-```bash
-git config --global user.name "Your Name"
-git config --global user.email "your_emu_username@company.com"
-```
-
-**Set up credential helper:**
-
-macOS:
-```bash
-git config --global credential.helper osxkeychain
-```
-
-Windows:
-```bash
-git config --global credential.helper manager
-```
-
-Linux:
-```bash
-git config --global credential.helper cache
-```
-
-**Test authentication:**
-```bash
-gh auth login
-```
-
-Select:
-- GitHub.com
-- HTTPS
-- Login with your EMU credentials
-- Complete web-based authentication
-
-**Verify:**
-```bash
-gh auth status
-```
-
-Should show you're logged in to your EMU organization.
-
----
-
 ## Final Verification Checklist
 
 Run these commands to verify your setup:
@@ -206,9 +196,6 @@ Run these commands to verify your setup:
 code --version
 dotnet --version
 git --version
-
-# Check Copilot authentication
-gh auth status
 
 # Create a test .NET project
 mkdir ~/copilot-test
@@ -223,9 +210,6 @@ code .
 code --version
 dotnet --version
 git --version
-
-# Check Copilot authentication
-gh auth status
 
 # Create a test .NET project
 mkdir $HOME\copilot-test
@@ -246,47 +230,21 @@ If all of the above works, you're ready! 🎉
 
 ## Workshop Workspace Setup
 
-Before the workshop, set up your VS Code workspace with the workshop materials.
+Open the cloned workshop repository in VS Code.
 
-### 1. Clone the Workshop Repository
-
-**macOS (Terminal):**
-```bash
-# Create a workshop folder in your home directory
-mkdir -p ~/workshop
-cd ~/workshop
-
-# Clone the workshop repository
-git clone https://github.com/stephbu/AgentWorkshop.git
-
-# Navigate to the workshop folder
-cd AgentWorkshop
-```
-
-**Windows (PowerShell):**
-```powershell
-# Create a workshop folder in your home directory
-New-Item -ItemType Directory -Force -Path $HOME\workshop
-cd $HOME\workshop
-
-# Clone the workshop repository
-git clone https://github.com/stephbu/AgentWorkshop.git
-
-# Navigate to the workshop folder
-cd AgentWorkshop
-```
-
-### 2. Open as VS Code Workspace
+### 1. Open as VS Code Workspace
 
 **Option A: From Terminal/PowerShell**
 
 **macOS:**
 ```bash
+cd ~/workshop/AgentWorkshop
 code .
 ```
 
 **Windows:**
 ```powershell
+cd $HOME\workshop\AgentWorkshop
 code .
 ```
 
@@ -294,16 +252,16 @@ code .
 
 | Platform | Steps |
 |----------|-------|
-| **macOS** | File → Open Folder (or `Cmd+O`) → Select `AgentWorkshop` → Click "Open" |
-| **Windows** | File → Open Folder (or `Ctrl+K Ctrl+O`) → Select `AgentWorkshop` → Click "Select Folder" |
+| **macOS** | File → Open Folder (or `Cmd+O`) → Navigate to `~/workshop/AgentWorkshop` → Click "Open" |
+| **Windows** | File → Open Folder (or `Ctrl+K Ctrl+O`) → Navigate to `%USERPROFILE%\workshop\AgentWorkshop` → Click "Select Folder" |
 
-### 3. Trust the Workspace
+### 2. Trust the Workspace
 
 When prompted:
 1. Click "Yes, I trust the authors"
 2. This enables full VS Code functionality including extensions
 
-### 4. Recommended Workspace Settings
+### 3. Recommended Workspace Settings
 
 Create a `.vscode/settings.json` file (if not present) with these recommended settings:
 
@@ -321,7 +279,7 @@ Create a `.vscode/settings.json` file (if not present) with these recommended se
 }
 ```
 
-### 5. Install Recommended Extensions
+### 4. Install Recommended Extensions
 
 The workshop may include an `.vscode/extensions.json` file. If prompted:
 1. Click "Install All" when VS Code suggests recommended extensions
@@ -330,7 +288,7 @@ The workshop may include an `.vscode/extensions.json` file. If prompted:
    - **GitHub Copilot** (github.copilot)
    - **GitHub Copilot Chat** (github.copilot-chat)
 
-### 6. Verify Workspace Setup
+### 5. Verify Workspace Setup
 
 1. Open the Explorer view (`Cmd+Shift+E` / `Ctrl+Shift+E`)
 2. You should see the workshop folder structure:
@@ -347,7 +305,7 @@ The workshop may include an `.vscode/extensions.json` file. If prompted:
 4. Type: `@workspace What files are in this project?`
 5. Copilot should list the workshop contents
 
-### 7. Open Multiple Folders (Optional)
+### 6. Open Multiple Folders (Optional)
 
 If working on lab exercises in separate folders:
 
@@ -366,7 +324,7 @@ See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) if you encounter problems.
 
 ---
 
-## 7. Model Context Protocol (MCP) Servers (Optional)
+## 9. Model Context Protocol (MCP) Servers (Optional)
 
 MCP servers extend GitHub Copilot's capabilities by connecting to external systems like GitHub Issues and Azure DevOps.
 
