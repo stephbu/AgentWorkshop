@@ -19,8 +19,20 @@ Before the workshop begins, ensure you have completed ALL items below:
 
 **Download:** https://code.visualstudio.com/
 
+| Platform | Download | Notes |
+|----------|----------|-------|
+| **macOS** | Download `.dmg` or use Homebrew: `brew install --cask visual-studio-code` | Drag to Applications folder |
+| **Windows** | Download `.exe` installer | Check "Add to PATH" during install |
+
 **Verify installation:**
+
+**macOS (Terminal):**
 ```bash
+code --version
+```
+
+**Windows (PowerShell or Command Prompt):**
+```powershell
 code --version
 ```
 
@@ -34,15 +46,34 @@ Should display version 1.85 or later.
 
 Install .NET 8.0 SDK (or later).
 
+| Platform | Installation Method |
+|----------|--------------------|
+| **macOS** | Download `.pkg` installer or use Homebrew: `brew install dotnet-sdk` |
+| **Windows** | Download `.exe` installer and run |
+
 **Verify installation:**
+
+**macOS (Terminal):**
 ```bash
+dotnet --version
+```
+
+**Windows (PowerShell):**
+```powershell
 dotnet --version
 ```
 
 Should display 8.0.x or later.
 
 **Additional verification:**
+
+**macOS:**
 ```bash
+dotnet --list-sdks
+```
+
+**Windows:**
+```powershell
 dotnet --list-sdks
 ```
 
@@ -169,6 +200,7 @@ Should show you're logged in to your EMU organization.
 
 Run these commands to verify your setup:
 
+**macOS (Terminal):**
 ```bash
 # Check versions
 code --version
@@ -185,6 +217,23 @@ dotnet new console
 code .
 ```
 
+**Windows (PowerShell):**
+```powershell
+# Check versions
+code --version
+dotnet --version
+git --version
+
+# Check Copilot authentication
+gh auth status
+
+# Create a test .NET project
+mkdir $HOME\copilot-test
+cd $HOME\copilot-test
+dotnet new console
+code .
+```
+
 In VS Code:
 1. Open the `Program.cs` file
 2. Open Copilot Chat (`Cmd+Shift+I` / `Ctrl+Shift+I`)
@@ -192,6 +241,122 @@ In VS Code:
 4. Verify Copilot responds and suggests code
 
 If all of the above works, you're ready! 🎉
+
+---
+
+## Workshop Workspace Setup
+
+Before the workshop, set up your VS Code workspace with the workshop materials.
+
+### 1. Clone the Workshop Repository
+
+**macOS (Terminal):**
+```bash
+# Create a workshop folder in your home directory
+mkdir -p ~/workshop
+cd ~/workshop
+
+# Clone the workshop repository
+git clone https://github.com/stephbu/AgentWorkshop.git
+
+# Navigate to the workshop folder
+cd AgentWorkshop
+```
+
+**Windows (PowerShell):**
+```powershell
+# Create a workshop folder in your home directory
+New-Item -ItemType Directory -Force -Path $HOME\workshop
+cd $HOME\workshop
+
+# Clone the workshop repository
+git clone https://github.com/stephbu/AgentWorkshop.git
+
+# Navigate to the workshop folder
+cd AgentWorkshop
+```
+
+### 2. Open as VS Code Workspace
+
+**Option A: From Terminal/PowerShell**
+
+**macOS:**
+```bash
+code .
+```
+
+**Windows:**
+```powershell
+code .
+```
+
+**Option B: From VS Code**
+
+| Platform | Steps |
+|----------|-------|
+| **macOS** | File → Open Folder (or `Cmd+O`) → Select `AgentWorkshop` → Click "Open" |
+| **Windows** | File → Open Folder (or `Ctrl+K Ctrl+O`) → Select `AgentWorkshop` → Click "Select Folder" |
+
+### 3. Trust the Workspace
+
+When prompted:
+1. Click "Yes, I trust the authors"
+2. This enables full VS Code functionality including extensions
+
+### 4. Recommended Workspace Settings
+
+Create a `.vscode/settings.json` file (if not present) with these recommended settings:
+
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "ms-dotnettools.csharp",
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "dotnet.defaultSolution": "disable",
+  "omnisharp.enableRoslynAnalyzers": true,
+  "github.copilot.enable": {
+    "*": true
+  }
+}
+```
+
+### 5. Install Recommended Extensions
+
+The workshop may include an `.vscode/extensions.json` file. If prompted:
+1. Click "Install All" when VS Code suggests recommended extensions
+2. Or manually install:
+   - **C# Dev Kit** (ms-dotnettools.csdevkit)
+   - **GitHub Copilot** (github.copilot)
+   - **GitHub Copilot Chat** (github.copilot-chat)
+
+### 6. Verify Workspace Setup
+
+1. Open the Explorer view (`Cmd+Shift+E` / `Ctrl+Shift+E`)
+2. You should see the workshop folder structure:
+   ```
+   AgentWorkshop/
+   ├── 00-prerequisites/
+   ├── 01-greenfield/
+   ├── 02-brownfield/
+   ├── resources/
+   └── README.md
+   ```
+
+3. Open Copilot Chat (`Cmd+Shift+I` / `Ctrl+Shift+I`)
+4. Type: `@workspace What files are in this project?`
+5. Copilot should list the workshop contents
+
+### 7. Open Multiple Folders (Optional)
+
+If working on lab exercises in separate folders:
+
+1. File → Add Folder to Workspace
+2. Select the lab folder (e.g., `01-greenfield/HighLow`)
+3. Save the workspace: File → Save Workspace As...
+4. Name it `AgentWorkshop.code-workspace`
+
+This creates a multi-root workspace for easy navigation between materials and your code.
 
 ---
 
