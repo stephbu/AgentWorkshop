@@ -1,6 +1,6 @@
 # Greenfield Lab: Build from Scratch
 
-**Duration:** ~60 minutes  
+**Duration:** ~70 minutes  
 **Goal:** Learn spec-first development by building a new C# project from the ground up.
 
 ---
@@ -9,9 +9,10 @@
 
 In this lab, you will:
 1. Create an `AGENTS.md` file to establish project conventions
-2. Write Product Requirements and Implementation Plan for a CLI application
-3. Use AI agents to implement the application from your requirements
-4. Iterate by refining requirements (not code) when issues arise
+2. Write Product Requirements for a CLI application
+3. Create an Implementation Plan to guide the agent
+4. Use AI agents to implement the application from your requirements
+5. Iterate by refining requirements (not code) when issues arise
 
 ---
 
@@ -163,9 +164,9 @@ Review my AGENTS.md for clarity and completeness.
 ```
 ---
 
-## Part 2: Write Product Requirements and Implementation Plan (10 minutes)
+## Part 2: Write Product Requirements (10 minutes)
 
-Now write requirements and a plan for what the application should do.
+Now write requirements for what the application should do.
 
 ### Step 2.1: Create requirements document
 
@@ -173,7 +174,7 @@ Create: `/01-greenfield/HighLow/docs/PRODUCT-REQUIREMENTS.md`
 
 ### Step 2.2: Write the requirements
 
-Use the [PRODUCT-REQUIREMENTS-TEMPLATE.md](./PRODUCT-REQUIREMENTS-TEMPLATE.md) and [IMPLEMENTATION-PLAN-TEMPLATE.md](./IMPLEMENTATION-PLAN-TEMPLATE.md) or create your own.
+Use the [PRODUCT-REQUIREMENTS-TEMPLATE.md](./PRODUCT-REQUIREMENTS-TEMPLATE.md) or create your own.
 
 **💡 Pro Tip: Let the agent help populate the template!**
 
@@ -328,32 +329,98 @@ Play again? (Y/N): _
 - Joker cards
 - Multi-player mode
 - Card counting hints
-
-## Implementation Plan
-1. Create Models folder with Card, Deck, Suit, GameState classes
-2. Create Services folder with GameService (game loop) and ScoringService
-3. Create Display folder with ConsoleRenderer for ASCII card art
-4. Implement main game loop in Program.cs
-5. Add unit tests for scoring logic and deck shuffling
-6. Add error handling for invalid input
 ```
 
-### Step 2.3: Review your requirements
+### Step 2.3: Review your requirements with the agent
 
-Ask yourself:
-- Can I test these requirements?
-- Are the behaviors unambiguous?
-- Have I included examples?
-- Is the implementation plan clear?
-- What edge cases might break this?
+Use the agent to review your requirements document. Try these prompts:
+
+**Check for testability:**
+```
+Review my requirements document. Can each requirement be tested? 
+Identify any that are vague or unmeasurable.
+```
+
+**Check for ambiguity:**
+```
+Are there any ambiguous behaviors in my requirements? 
+What assumptions might different developers make?
+```
+
+**Check for completeness:**
+```
+What edge cases or scenarios are missing from my requirements? 
+What could break this implementation?
+```
+
+**Overall review:**
+```
+Review my PRODUCT-REQUIREMENTS.md for clarity and completeness. 
+Suggest improvements to make it easier for an AI agent to implement.
+```
 
 ---
 
-## Part 3: Generate Implementation (20 minutes)
+## Part 3: Implementation Planning (10 minutes)
+
+Before generating code, create a detailed implementation plan to guide the agent.
+
+### Step 3.1: Create implementation plan
+
+Create: `/01-greenfield/HighLow/docs/IMPLEMENTATION-PLAN.md`
+
+### Step 3.2: Write the plan
+
+Use the [IMPLEMENTATION-PLAN-TEMPLATE.md](./IMPLEMENTATION-PLAN-TEMPLATE.md) or create your own.
+
+**💡 Pro Tip: Let the agent help build the plan!**
+
+**Start with a question:**
+```
+Based on my PRODUCT-REQUIREMENTS.md and AGENTS.md, help me create 
+an implementation plan. What components do I need? In what order 
+should they be built? What are the dependencies between them?
+```
+
+The agent will help you think through:
+- Component architecture and dependencies
+- Build order (what needs to exist first)
+- Interface definitions
+- Testing strategy for each component
+
+**Review the plan with the agent:**
+
+**Check for dependencies:**
+```
+Review my implementation plan. Are the dependencies between 
+components clear? Will the agent know what to build first?
+```
+
+**Check for testability:**
+```
+Does my implementation plan include a testing strategy? 
+How will each component be unit tested?
+```
+
+**Check for completeness:**
+```
+What's missing from my implementation plan? What decisions 
+should I make before the agent starts coding?
+```
+
+**Overall review:**
+```
+Review my IMPLEMENTATION-PLAN.md for clarity and completeness. 
+Will an AI agent be able to follow this plan step-by-step?
+```
+
+---
+
+## Part 4: Generate Implementation (20 minutes)
 
 Now let the AI agent build your application!
 
-### Step 3.1: Initial scaffold
+### Step 4.1: Initial scaffold
 
 **Prompt to agent:**
 ```
@@ -361,7 +428,7 @@ Create a new C# console application following the structure defined in AGENTS.md
 Set up the project with:
 - .NET 8.0 console app
 - xUnit testing project
-- Folder structure as specified (Models, Services, Display)
+- Folder structure
 
 Don't implement features yet—just create the skeleton.
 ```
@@ -371,11 +438,12 @@ Don't implement features yet—just create the skeleton.
 - Folder structure
 - Empty classes/interfaces
 
-### Step 3.2: Implement the feature
+### Step 4.2: Implement the feature
 
 **Prompt to agent:**
 ```
-Implement the HighLow card game according to requirements/HIGHLOW-REQUIREMENTS.md.
+Implement the HighLow card game according to docs/PRODUCT-REQUIREMENTS.md
+and docs/IMPLEMENTATION-PLAN.md.
 Follow all conventions in AGENTS.md.
 Include unit tests for:
 - Card comparison logic
@@ -390,7 +458,7 @@ Start with the core game loop, then add the fancy display.
 - Are card symbols displaying correctly?
 - Is the scoring formula implemented correctly?
 
-### Step 3.3: Build and test
+### Step 4.3: Build and test
 
 Run the project:
 ```bash
@@ -413,7 +481,7 @@ dotnet test
 
 ---
 
-## Part 4: Iterate on Requirements (15 minutes)
+## Part 5: Iterate on Requirements (15 minutes)
 
 Issues will arise. Practice fixing them by **updating requirements**, not editing code.
 
@@ -487,7 +555,7 @@ Ace (1) is lower than all other cards.
 
 ---
 
-## Part 5: Reflect (5 minutes)
+## Part 6: Reflect (5 minutes)
 
 ### Discussion Questions
 
