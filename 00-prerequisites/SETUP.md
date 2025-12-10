@@ -326,15 +326,21 @@ See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) if you encounter problems.
 
 ## 9. Model Context Protocol (MCP) Servers (Optional)
 
-MCP servers extend GitHub Copilot's capabilities by connecting to external systems like GitHub Issues and Azure DevOps.
+MCP servers extend GitHub Copilot's capabilities by connecting to external tools and services.
 
 ### What is MCP?
 
-Model Context Protocol enables AI agents to:
-- Read and write GitHub Issues
-- Create and update Azure DevOps work items
-- Access project management data from within VS Code
-- Automatically update tasks based on code changes
+Model Context Protocol (MCP) is an open standard that enables AI agents to interact with external tools and data sources. With MCP servers, Copilot can:
+- Connect to external services (GitHub, Azure DevOps, databases, APIs, etc.)
+- Read and write data in those systems
+- Perform actions on your behalf (create issues, update work items, query data)
+- Access context beyond the current workspace
+
+**Example integrations:**
+- **GitHub:** Read/write issues, PRs, discussions
+- **Azure DevOps:** Create/update work items, query boards
+- **Databases:** Query and analyze data
+- **Custom APIs:** Connect to internal tools
 
 **Benefits for development:**
 - Update work items as you implement features
