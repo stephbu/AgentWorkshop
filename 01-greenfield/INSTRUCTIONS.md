@@ -149,7 +149,6 @@ public record Card(Suit Suit, int Value)
     };
 }
 ```
-```
 
 ### Step 1.3: Review and refine
 
@@ -158,8 +157,10 @@ Read through your `AGENTS.md`:
 - Would a new developer understand your conventions?
 - Are there ambiguities an agent might misinterpret?
 
-**Tip:** Ask the agent, "Review my AGENTS.md for clarity and completeness."
-
+**Tip:** Ask the agent: 
+```markdown
+Review my AGENTS.md for clarity and completeness.
+```
 ---
 
 ## Part 2: Write Product Requirements and Implementation Plan (10 minutes)
@@ -168,7 +169,7 @@ Now write requirements and a plan for what the application should do.
 
 ### Step 2.1: Create requirements document
 
-Create: `/01-greenfield/HighLow/requirements/HIGHLOW-REQUIREMENTS.md`
+Create: `/01-greenfield/HighLow/docs/PRODUCT-REQUIREMENTS.md`
 
 ### Step 2.2: Write the requirements
 
