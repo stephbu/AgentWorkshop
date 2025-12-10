@@ -80,6 +80,9 @@ and guess whether the next card will be higher or lower in value.
   README.md
 
 ## Coding Conventions
+
+> Follow [.NET C# Coding Conventions](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions)
+
 - Use C# 12 features (primary constructors, file-scoped namespaces)
 - Immutable models where possible (records for Card)
 - Dependency injection where appropriate

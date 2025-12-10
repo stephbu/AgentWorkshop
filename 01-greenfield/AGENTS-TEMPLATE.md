@@ -30,6 +30,7 @@ Use this template to create an `AGENTS.md` file for a new C# project.
 
 ```
 /ProjectName
+  /docs              - Documentation
   /src
     /ProjectName
       /Commands      - [Describe what goes here]
@@ -48,6 +49,8 @@ Use this template to create an `AGENTS.md` file for a new C# project.
 ---
 
 ## Coding Conventions
+
+> **Reference:** Follow the [.NET C# Coding Conventions](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions) as the baseline style guide. Project-specific conventions below extend or clarify the official guidelines.
 
 ### Language Features
 - Use C# 12 features (primary constructors, file-scoped namespaces, etc.)
@@ -120,6 +123,34 @@ public class GameService
     }
 }
 ```
+
+### Project Documentation
+
+Store all project documentation in the `/docs` folder using Markdown format.
+
+**Documentation Requirements:**
+- Use Markdown (`.md`) for all documentation files
+- Store documentation in `/docs` folder at project root
+- Update documentation after each action or change completes
+- Use proper heading hierarchy (`#`, `##`, `###`, etc.)
+
+**Recommended `/docs` Structure:**
+```
+/docs
+  README.md              - Documentation index/overview
+  architecture.md        - System architecture and design decisions
+  api.md                 - API reference (if applicable)
+  setup.md               - Development environment setup
+  deployment.md          - Build and deployment instructions
+  changelog.md           - Version history and changes
+```
+
+**Documentation Style:**
+- Start each document with a level-1 heading (`#`)
+- Use level-2 headings (`##`) for major sections
+- Use level-3 headings (`###`) for subsections
+- Include code examples in fenced code blocks with language hints
+- Keep documentation up-to-date with code changes
 
 ---
 
