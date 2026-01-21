@@ -45,6 +45,10 @@ This is a **documentation and training repository**, not a software application.
   /resources                 - Reference materials
     BEST-PRACTICES.md        - AI development best practices
     CHEATSHEET.md            - Quick reference for prompts
+
+  /modules                   - Composable module content
+    /{level}-{name}          - Module folder naming (e.g., 100-IntroductionToVSCode)
+      {resource}.md          - Module resources (e.g., slides.md)
   
   COURSE-OUTLINE.md          - Detailed facilitator guide
   SLIDES.md                  - Presentation content
@@ -167,7 +171,8 @@ When working in this repository:
 4. **Use consistent formatting** - Match existing markdown style in the repo
 5. **Maintain the workshop flow** - Changes should support the learning progression
 6. **Make prompts copy-pasteable** - Use code blocks for example prompts
-7. **Update related documents** - If changing structure, check for references in other files
+7. **Write modules in `/modules`** - Store module content under `/modules/{level}-{name}/{resource}.md`
+8. **Update related documents** - If changing structure, check for references in other files
 
 ### When Updating Lab Instructions
 

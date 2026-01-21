@@ -33,19 +33,21 @@ Examples: `PR-01`, `CC-03`, `GF-04`, `BF-02`, `SP-01`, `WR-01`, `OP-01`
 
 ## Module File Layout
 
-Each module lives in its own folder with a `README.md`:
+Each module lives under `/modules` and uses a level-based folder name. Store
+module resources as individual Markdown files:
 
 ```
 modules/
-  [TYPE]-[NN]-[short-slug]/
-    README.md
+  {level}-{name}/
+    {resource}.md
 ```
 
-Example: `modules/CC-01-requirements-first/README.md`
+Example: `modules/100-IntroductionToVSCode/slides.md`
 
 ## Required Module Metadata
 
-Include this metadata at the top of each module:
+Include this metadata at the top of the primary module overview resource
+(e.g., `overview.md` or `README.md`):
 
 | Field | Description |
 | --- | --- |

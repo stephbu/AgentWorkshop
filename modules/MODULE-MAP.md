@@ -2,7 +2,8 @@
 
 Mapping of existing materials into composable 15-minute modules, with
 dependencies and noted gaps. This map references current files and will be
-refined as modules are authored under `modules/`.
+refined as modules are authored under `/modules/{level}-{name}/{resource}.md`
+(e.g., `/modules/100-IntroductionToVSCode/slides.md`).
 
 ## Prerequisites and Setup
 
@@ -70,4 +71,4 @@ refined as modules are authored under `modules/`.
 - CC-02A: Repo basics module needed (define repo, branches, files, readme, docs).
 - CC-02B: VS Code orientation module needed (panels, explorer, open folder, terminal).
 - CC-07: Fast vs Slow test classification should be pulled into a dedicated module section.
-- Convert each workflow step into a module `README.md` under `modules/` using `resources/templates/MODULE-TEMPLATE.md`.
+- Convert each workflow step into module resources under `/modules/{level}-{name}/` using `resources/templates/MODULE-TEMPLATE.md`.
