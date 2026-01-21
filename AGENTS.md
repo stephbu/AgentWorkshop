@@ -101,6 +101,7 @@ When providing setup or terminal instructions:
 
 ```markdown
 **Windows (PowerShell):**
+```
 ```powershell
 cd $HOME\workshop
 ```
@@ -108,7 +109,6 @@ cd $HOME\workshop
 **macOS (Terminal):**
 ```bash
 cd ~/workshop
-```
 ```
 
 ---
